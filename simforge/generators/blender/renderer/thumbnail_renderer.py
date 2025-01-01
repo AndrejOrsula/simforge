@@ -2,7 +2,6 @@ import math
 from pathlib import Path
 from typing import Tuple
 
-import mathutils
 from pydantic import FiniteFloat, NonNegativeFloat, PositiveFloat, PositiveInt
 
 from simforge import Renderer
@@ -53,6 +52,7 @@ class BlThumbnailRenderer(Renderer):
 
     def render(self, filepath: Path):
         import bpy
+        import mathutils
 
         # Hide all rendering of all objects except the active
         objects_to_unhide = []
