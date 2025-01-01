@@ -43,7 +43,7 @@ all = [
 ]
 ## Assets
 assets = ["simforge[foundry]"]
-foundry = []
+foundry = ["simforge_foundry"]
 ## Generators
 bpydev = ["simforge[bpy]", "fake-bpy-module"]
 bpy = ["bpy~=4.0"]
