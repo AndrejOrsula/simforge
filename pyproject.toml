@@ -1,0 +1,59 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+follow_imports = "silent"
+
+[project]
+name = "simforge"
+version = "0.1.0"
+description = "Diverse simulations through procedural generation"
+authors = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
+maintainers = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
+urls = { Repository = "https://github.com/AndrejOrsula/simforge", Documentation = "https://AndrejOrsula.github.io/simforge" }
+classifiers = [
+  "Programming Language :: Python",
+  "License :: OSI Approved :: MIT License",
+  "License :: OSI Approved :: Apache Software License",
+  "Topic :: Multimedia :: Graphics :: 3D Modeling",
+  "Topic :: Games/Entertainment :: Simulation",
+]
+keywords = ["simulation", "procedural"]
+readme = "README.md"
+license = { text = "MIT OR Apache-2.0" }
+requires-python = ">=3.10"
+dependencies = [
+  ## Paths
+  "platformdirs~=4.0",
+  ## Typing
+  "pydantic~=2.0",
+]
+
+[project.optional-dependencies]
+all = [
+  ## Assets
+  "simforge[assets]",
+  ## Generators
+  "simforge[bpydev]",
+  ## Utils
+  "simforge[cli]",
+  "simforge[dev]",
+]
+## Assets
+assets = ["simforge[foundry]"]
+foundry = []
+## Generators
+bpydev = ["simforge[bpy]", "fake-bpy-module"]
+bpy = ["bpy~=4.0"]
+## Utils
+cli = ["simforge[rich]", "argcomplete~=1.0"]
+dev = ["simforge[test]", "simforge[tracing]", "devtools~=0.12"]
+rich = ["rich~=13.0"]
+test = ["pytest~=8.0"]
+tracing = ["simforge[rich]", "logfire~=2.0"]
+
+[project.scripts]
+simforge = "simforge.__main__:main"
+sf = "simforge.__main__:main"

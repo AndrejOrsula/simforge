@@ -1,0 +1,10 @@
+[book]
+title = "SimForge"
+description = "Diverse simulations through procedural generation"
+authors = ["Andrej Orsula"]
+language = "en"
+
+[output.html]
+site-url = "/simforge/"
+git-repository-url = "https://github.com/AndrejOrsula/simforge"
+edit-url-template = "https://github.com/AndrejOrsula/simforge/edit/main/docs/{path}"

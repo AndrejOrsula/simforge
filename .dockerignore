@@ -1,0 +1,29 @@
+## Python
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+## Virtual environments
+.venv
+
+## Dev Container
+.devcontainer/
+
+## Docker
+Dockerfile*
+.docker/
+.dockerignore
+
+## Git
+.git/
+.gitignore
+
+## GitHub
+.github/
+
+## Pre-commit
+.git_hooks/
+.pre-commit-config.yaml

@@ -1,0 +1,52 @@
+name: Python
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - "docs/**"
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }} @ ${{ github.event.pull_request.head.label || github.head_ref || github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  python:
+    runs-on: ubuntu-latest
+    env:
+      UV_PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+        with:
+          enable-cache: true
+          cache-dependency-glob: "uv.lock"
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+      - name: Set up coverage
+        run: uv add pytest-cov
+      - name: Install the project
+        run: uv sync --all-extras
+      - name: Run tests
+        run: uv run pytest tests
+      - name: Generate coverage
+        run: uv run pytest --cov=./ --cov-report=xml
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage.xml
+          fail_ci_if_error: false
+      - name: Build
+        run: uv build
+      - name: Publish
+        if: ${{ github.event_name == 'release' && env.UV_PYPI_TOKEN != '' }}
+        run: uv publish -t ${{ env.UV_PYPI_TOKEN }}
