@@ -278,24 +278,33 @@ class Generator(BaseModel):
         if cls.__IS_SUBPROC_SF_ENSURED:
             return
         cls.__IS_SUBPROC_SF_ENSURED = True
+
+        extras = (
+            f"[{cls.SUBPROC_INSTALL_SF_EXTRAS}]"
+            if cls.SUBPROC_INSTALL_SF_EXTRAS
+            else ""
+        )
         for src_path in simforge.__path__:
             project_path = Path(src_path).parent
             if project_path.joinpath("pyproject.toml").exists():
-                is_editable = True
-                install_target = project_path.as_posix()
+                install_args = (
+                    "-e",
+                    project_path.as_posix() + extras,
+                )
                 break
         else:
-            is_editable = False
-            install_target = f'simforge=={importlib.metadata.version("simforge")}'
+            install_args = (
+                "simforge" + extras + f'=={importlib.metadata.version("simforge")}',
+            )
 
         expr = [
             "from importlib.util import find_spec",
             'exit(0) if find_spec("simforge") else ()',
             "from subprocess import check_call",
             "from sys import executable",
-            'check_call([executable,"-m","pip","install","--no-input","--no-cache-dir",'
-            + ('"-e",' if is_editable else "")
-            + f'"{install_target}[{cls.SUBPROC_INSTALL_SF_EXTRAS}]"])',
+            'check_call([executable,"-m","pip","install","--no-input","--no-cache-dir","-I",'
+            + ",".join(f'"{arg}"' for arg in install_args)
+            + "])",
         ]
 
         cls.__subprocess_run(expr)
