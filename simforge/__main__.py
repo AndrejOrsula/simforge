@@ -11,7 +11,7 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping
 
-from simforge.core import AssetRegistry, ModelFileFormat
+from simforge.core import AssetRegistry, FileFormat
 from simforge.utils import SF_CACHE_DIR, convert_to_snake_case, logging
 
 
@@ -25,7 +25,7 @@ def main():
             case "clean":
                 clean_assets(**kwargs)
             case _:
-                logging.critical(f'Unknown subcommand: "{subcommand}"')
+                raise ValueError(f'Unknown subcommand: "{subcommand}"')
 
     impl(**vars(parse_cli_args()))
 
@@ -36,7 +36,7 @@ def generate_assets(
     assets: Iterable[str],
     ## Output
     outdir: str,
-    ext: str,
+    ext: Iterable[str],
     ## Generator
     seed: int,
     num_assets: int,
@@ -67,7 +67,7 @@ def generate_assets(
             outdir=Path(outdir),
             seed=seed,
             num_assets=num_assets,
-            file_format=ModelFileFormat.from_ext(ext),
+            file_format=[FileFormat.from_ext_any(e) for e in ext],
             use_cache=not no_cache,
         )
         if subprocess:
@@ -257,8 +257,10 @@ def parse_cli_args() -> argparse.Namespace:
         "-e",
         "--ext",
         type=str,
-        help="""The file extension of the exported assets (ABC|FBX|GLB|GLTF|OBJ|PLY|SDF|STL|USD|USDA|USDC|USDZ)""",
-        default="usdz",
+        nargs="*",
+        help="The file extension of the exported assets",
+        choices=sorted(map(str, FileFormat.all_formats())),
+        default=["png", "mdl", "usdz"],
     )
     group = generate_parser.add_argument_group("Generator")
     group.add_argument(

@@ -37,7 +37,7 @@ class MaterialExporter(Exporter):
 
 class ModelExporter(Exporter):
     SUPPORTED_ASSETS = [AssetType.ARTICULATION, AssetType.GEOMETRY, AssetType.MODEL]
-    file_format: ModelFileFormat = ModelFileFormat.GLTF
+    file_format: ModelFileFormat = ModelFileFormat.USDZ
 
     @property
     def supports_material(self) -> bool:
