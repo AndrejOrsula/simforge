@@ -1,6 +1,6 @@
 from typing import Annotated, Dict, List, TypeAlias
 
-from annotated_types import MinLen
+from annotated_types import Len
 from pydantic import InstanceOf, PositiveInt
 
 from simforge._typing.enum import EnumNameSerializer
@@ -9,14 +9,21 @@ from simforge.core.baker import BakeType
 from simforge.core.exporter import Exporter, FileFormat
 
 FileFormatConfig: TypeAlias = (
-    InstanceOf[FileFormat] | Annotated[List[InstanceOf[FileFormat]], MinLen(1)] | None
+    InstanceOf[FileFormat]
+    | Annotated[
+        List[InstanceOf[FileFormat]], Len(min_length=1, max_length=len(AssetType))
+    ]
+    | None
 )
 
 ExporterConfig: TypeAlias = (
     InstanceOf[Exporter]
-    | Annotated[List[InstanceOf[Exporter]], MinLen(1)]
     | Annotated[
-        Dict[Annotated[AssetType, EnumNameSerializer], InstanceOf[Exporter]], MinLen(1)
+        List[InstanceOf[Exporter]], Len(min_length=1, max_length=len(AssetType))
+    ]
+    | Annotated[
+        Dict[Annotated[AssetType, EnumNameSerializer], InstanceOf[Exporter]],
+        Len(min_length=1, max_length=len(AssetType)),
     ]
 )
 
@@ -24,6 +31,6 @@ TexResConfig: TypeAlias = (
     PositiveInt
     | Annotated[
         Dict[Annotated[BakeType, EnumNameSerializer], PositiveInt],
-        MinLen(len(BakeType)),
+        Len(min_length=1, max_length=len(BakeType)),
     ]
 )
