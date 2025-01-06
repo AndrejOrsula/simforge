@@ -1,19 +1,17 @@
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import ClassVar, Iterable, Set, Type
+from typing import ClassVar, Iterable, List, Type
 
 
 class FileFormat(str, Enum):
-    __all_formats: ClassVar[Set[Type[FileFormat]]] = set()
-
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
-        cls.__all_formats.add(cls)
+        FileFormatRegistry.registry.append(cls)
 
-    @classmethod
-    def all_formats(cls) -> Iterable[FileFormat]:
-        return (format for formats in cls.__all_formats for format in formats)
+    @staticmethod
+    def all_formats() -> Iterable[FileFormat]:
+        return (format for formats in FileFormatRegistry.registry for format in formats)
 
     def __str__(self) -> str:
         return self.name.lower()
@@ -45,6 +43,10 @@ class FileFormat(str, Enum):
             raise ValueError(
                 f'Extension "{ext}" is not a valid "{FileFormat.__name__}"'
             )
+
+
+class FileFormatRegistry:
+    registry: ClassVar[List[Type[FileFormat]]] = []
 
 
 class ImageFileFormat(FileFormat):
