@@ -101,6 +101,10 @@ class Generator(BaseModel):
     def generate(
         self, asset: Asset, export_kwargs: Mapping[str, Any] = {}, **kwargs
     ) -> Sequence[Tuple[Path, Mapping[str, Any]]]:
+        logging.info(
+            f'Requested {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
+        )
+
         # Map asset type to callables
         match asset.asset_type:
             case AssetType.ARTICULATION:
@@ -213,11 +217,11 @@ class Generator(BaseModel):
         match n_cached:
             case 0:
                 logging.info(
-                    f"Generated {self.num_assets} \"{asset.name}' asset{'s' if self.num_assets > 1 else ''} at {self.__asset_filepath_base(asset)}"
+                    f'Generated {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
                 )
             case _all if n_cached == self.num_assets:
                 logging.info(
-                    f"Cached {n_cached} \"{asset.name}' asset{'s' if n_cached > 1 else ''} from {self.__asset_filepath_base(asset)}"
+                    f'Cached {n_cached} "{asset.name}" asset{"s" if n_cached > 1 else ""} from {self.__asset_filepath_base(asset)}'
                 )
             case _:
                 logging.info(
