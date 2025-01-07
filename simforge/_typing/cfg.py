@@ -1,7 +1,7 @@
 from typing import Annotated, Dict, List, TypeAlias
 
 from annotated_types import Len
-from pydantic import InstanceOf, PositiveInt
+from pydantic import InstanceOf, NonNegativeInt, PositiveInt
 
 from simforge._typing.enum import EnumNameSerializer
 from simforge.core.asset.asset_type import AssetType
@@ -28,7 +28,7 @@ ExporterConfig: TypeAlias = (
 )
 
 TexResConfig: TypeAlias = (
-    PositiveInt
+    NonNegativeInt
     | Annotated[
         Dict[Annotated[BakeType, EnumNameSerializer], PositiveInt],
         Len(min_length=1, max_length=len(BakeType)),

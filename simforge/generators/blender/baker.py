@@ -33,6 +33,9 @@ class BlBaker(Baker):
     def setup(self):
         import bpy
 
+        if not self.enabled:
+            return
+
         # Configure Cycles for GPU rendering
         context: bpy.types.Context = bpy.context  # type: ignore
         cycles_preferences = context.preferences.addons["cycles"].preferences
@@ -48,6 +51,16 @@ class BlBaker(Baker):
 
     def bake(self, texture_resolution: int | Dict[BakeType, int]):
         import bpy
+
+        if not self.enabled:
+            return
+
+        # Standardize the texture resolution input
+        if isinstance(texture_resolution, int):
+            assert texture_resolution > 0, "Texture resolution must be positive"
+            texture_resolution = {
+                bake_type: texture_resolution for bake_type in BakeType
+            }
 
         scene: bpy.types.Scene = bpy.context.scene  # type: ignore
 
@@ -78,12 +91,7 @@ class BlBaker(Baker):
             return
 
         # Unwrap UVs
-        min_texture_resolution = (
-            texture_resolution
-            if isinstance(texture_resolution, int)
-            else min((value for value in texture_resolution.values() if value > 0))
-        )
-        self._unwrap_selected(objects_to_bake, min_texture_resolution)
+        self._unwrap_selected(objects_to_bake, min(texture_resolution.values()))
 
         # Get scalar inputs of the shader nodes
         shader_const_inputs = self._get_shader_const_inputs(materials_to_bake)
@@ -113,27 +121,24 @@ class BlBaker(Baker):
                     ):
                         continue
 
+            if bake_type not in texture_resolution.keys():
+                raise ValueError(
+                    f'Missing texture resolution for bake type "{bake_type.name}"'
+                )
+
             # Update bake settings
-            pass_texture_resolution = (
-                texture_resolution
-                if isinstance(texture_resolution, int)
-                else texture_resolution[bake_type]
-            )
             scene.cycles.samples = (
                 self.render_samples
                 if isinstance(self.render_samples, int)
                 else self.render_samples.get(bake_type, 1)
             )
-            scene.render.bake.margin = max(1, pass_texture_resolution // 128)
-            assert (
-                pass_texture_resolution > 0
-            ), f"Invalid texture resolution for {bake_type}: {pass_texture_resolution}"
+            scene.render.bake.margin = max(1, texture_resolution[bake_type] // 128)
 
             # Bake the texture
             self._baked_textures[bake_type] = self._bake_single_pass(
                 bake_type=bake_type,
                 materials_to_bake=materials_to_bake,
-                texture_resolution=pass_texture_resolution,
+                texture_resolution=texture_resolution[bake_type],
                 texture_basename=material_name,
             )
 
@@ -152,6 +157,9 @@ class BlBaker(Baker):
 
     def cleanup(self):
         import bpy
+
+        if not self.enabled:
+            return
 
         for texture in self._baked_textures.values():
             bpy.data.images.remove(texture)

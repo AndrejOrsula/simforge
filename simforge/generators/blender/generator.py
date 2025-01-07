@@ -213,7 +213,11 @@ class BlGenerator(Generator):
             duplicate_geom.mesh.materials.append(material.mat)
 
         # Bake the material into textures
-        if asset.requires_baking and self.model_exporter_supports_material:
+        if (
+            self.BAKER.enabled
+            and asset.requires_baking
+            and self.model_exporter_supports_material
+        ):
             self.BAKER.bake(asset.texture_resolution)
 
         generate_kwargs = setup_kwargs
@@ -239,7 +243,11 @@ class BlGenerator(Generator):
 
         # Remove the baked textures
         # Bake the material into textures
-        if asset.requires_baking and self.model_exporter_supports_material:
+        if (
+            self.BAKER.enabled
+            and asset.requires_baking
+            and self.model_exporter_supports_material
+        ):
             self.BAKER.cleanup()
 
         # Purge orphaned data

@@ -98,9 +98,16 @@ class Generator(BaseModel):
             raise TypeError(f"Cannot instantiate abstract class {cls.__name__}")
         return super().__new__(cls)
 
+    def preprocess_asset(self, asset: Asset):
+        if not self.BAKER.enabled and isinstance(asset, Model):
+            asset.texture_resolution = 0
+
     def generate(
         self, asset: Asset, export_kwargs: Mapping[str, Any] = {}, **kwargs
     ) -> Sequence[Tuple[Path, Mapping[str, Any]]]:
+        # Preprocess the asset
+        self.preprocess_asset(asset)
+
         logging.info(
             f'Requested {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
         )
@@ -128,7 +135,8 @@ class Generator(BaseModel):
                 fn_export = self._export_material
                 fn_cleanup = self._cleanup_material
             case AssetType.MODEL:
-                self.BAKER.setup()
+                if self.BAKER.enabled:
+                    self.BAKER.setup()
                 fn_setup = self._setup_model
                 fn_generate = self._generate_model
                 fn_export = self._export_model
@@ -247,6 +255,10 @@ class Generator(BaseModel):
     def generate_subprocess(
         self, asset: Asset, export_kwargs: Mapping[str, Any] = {}, **kwargs
     ) -> Sequence[Tuple[Path, Mapping[str, Any]]]:
+        # TODO: Get the output directly from the subprocess instead of preprocessing the asset, checking the cache and reading the metadata
+        # Preprocess the asset
+        self.preprocess_asset(asset)
+
         # Ensure that the simforge package is installed
         self.__subprocess_ensure_sf_installed()
 
