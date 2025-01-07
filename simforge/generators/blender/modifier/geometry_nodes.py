@@ -11,7 +11,7 @@ if TYPE_CHECKING:
 class BlGeometryNodesModifier(BlGeometryModifier, BlNodesManager):
     @property
     def is_randomizable(self) -> bool:
-        return self.nodes.is_randomizable or self.affects_material
+        return self.nodes.is_randomizable or self.affects_material_randomized
 
     def setup(self, geo: "BlGeometry"):
         import bpy
@@ -58,4 +58,12 @@ class BlGeometryNodesModifier(BlGeometryModifier, BlNodesManager):
             key in self.nodes.material_input_names
             for key, value in self.inputs.items()
             if value is not None
+        )
+
+    @property
+    def affects_material_randomized(self) -> bool:
+        return any(
+            value.is_randomizable
+            for key, value in self.inputs.items()
+            if value is not None and key in self.nodes.material_input_names
         )
