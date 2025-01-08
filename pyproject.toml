@@ -56,4 +56,3 @@ tracing = ["simforge[rich]", "logfire~=2.0"]
 
 [project.scripts]
 simforge = "simforge.__main__:main"
-sf = "simforge.__main__:main"
