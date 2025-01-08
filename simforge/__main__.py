@@ -238,12 +238,10 @@ def parse_cli_args() -> argparse.Namespace:
     )
     group = generate_parser.add_argument_group("Input")
     group.add_argument(
-        "-a",
-        "--assets",
+        dest="assets",
         type=str,
         help="Names of the assets to export",
         nargs="+",
-        required=True,
     )
     group = generate_parser.add_argument_group("Output")
     group.add_argument(
