@@ -49,13 +49,9 @@ def generate_assets(
 ):
     for asset_name in assets:
         asset_name = convert_to_snake_case(asset_name)
-        try:
-            asset = next(
-                asset
-                for asset in AssetRegistry.values_inner()
-                if convert_to_snake_case(asset.__name__) == asset_name
-            )()
-        except StopIteration:
+        if asset_type := AssetRegistry.by_name(asset_name):
+            asset = asset_type()
+        else:
             all_asset_names = (
                 f'"{convert_to_snake_case(asset.__name__)}"'
                 for asset in AssetRegistry.values_inner()

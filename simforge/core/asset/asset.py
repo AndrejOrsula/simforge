@@ -1,17 +1,7 @@
 from __future__ import annotations
 
 from functools import cached_property
-from typing import (
-    TYPE_CHECKING,
-    ClassVar,
-    Dict,
-    Iterable,
-    List,
-    Mapping,
-    Sequence,
-    Tuple,
-    Type,
-)
+from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Sequence, Tuple, Type
 
 from pydantic import BaseModel
 
@@ -106,8 +96,8 @@ class Asset(BaseModel):
         )
 
     @classmethod
-    def registry(cls) -> Mapping[AssetType, Sequence[Type[Asset]]]:
-        return AssetRegistry.registry
+    def registry(cls) -> Sequence[Type[Asset]]:
+        return list(AssetRegistry.values_inner())
 
 
 class AssetRegistry:
@@ -129,7 +119,7 @@ class AssetRegistry:
 
     @classmethod
     def values_inner(cls) -> Iterable[Type[Asset]]:
-        return {asset for assets in cls.registry.values() for asset in assets}
+        return (asset for assets in cls.registry.values() for asset in assets)
 
     @classmethod
     def n_assets(cls) -> int:
@@ -144,3 +134,10 @@ class AssetRegistry:
     @classmethod
     def registered_packages(cls) -> Iterable[str]:
         return {module.split(".", maxsplit=1)[0] for module in cls.registered_modules()}
+
+    @classmethod
+    def by_name(cls, name: str) -> Type[Asset] | None:
+        for asset in cls.values_inner():
+            if convert_to_snake_case(asset.__name__) == name:
+                return asset
+        return None

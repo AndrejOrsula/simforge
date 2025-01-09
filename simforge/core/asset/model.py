@@ -5,7 +5,7 @@ from typing import Sequence, Type
 from pydantic import InstanceOf, SerializeAsAny
 
 from simforge._typing import TexResConfig
-from simforge.core.asset.asset import Asset
+from simforge.core.asset.asset import Asset, AssetRegistry
 from simforge.core.asset.asset_type import AssetType
 from simforge.core.asset.geometry import Geometry
 from simforge.core.asset.material import Material
@@ -22,4 +22,4 @@ class Model(Asset, asset_entrypoint=AssetType.MODEL):
 
     @classmethod
     def registry(cls) -> Sequence[Type[Model]]:
-        return super().registry().get(AssetType.MODEL, [])  # type: ignore
+        return AssetRegistry.registry.get(AssetType.MODEL, [])  # type: ignore
