@@ -12,6 +12,7 @@ WORKDIR "${SF_PATH}"
 ## Install dependencies
 # hadolint ignore=DL3013,SC2046
 RUN --mount=type=bind,source=pyproject.toml,target="${SF_PATH}/pyproject.toml" \
+    python -m pip install --no-input --no-cache-dir --upgrade pip && \
     python -m pip install --no-input --no-cache-dir toml~=0.10 && \
     python -m pip install --no-input --no-cache-dir $(python -c "f='${SF_PATH}/pyproject.toml'; from toml import load; print(' '.join(filter(lambda d: not d.startswith(p['name']), (*p.get('dependencies', ()), *(d for ds in p.get('optional-dependencies', {}).values() for d in ds)))) if (p := load(f).get('project', None)) else '')")
 
