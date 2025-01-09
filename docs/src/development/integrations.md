@@ -6,7 +6,7 @@ In a nutshell, the integration should consume any [Asset](../assets/index.md) de
 
 If the framework requires a specific environment that is not compatible with the generator, consider generating the assets in a subprocess via `Generator.generate_subprocess()` instead of `Generator.generate()`. This way, the generator can run in a separate process with the required environment, and the integration can spawn the assets in the framework without any compatibility issues.
 
-Example:
+Template:
 
 ```py
 from simforge import Asset

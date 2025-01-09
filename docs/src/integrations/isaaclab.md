@@ -16,7 +16,7 @@ The `SimforgeAssetCfg` class is a `SpawnerCfg` (`FileCfg`) subclass that streaml
 - `use_cache`: Use cached assets instead of generating new ones (default: `True`)
 - `random_choice`: Randomly select variants instead of sequentially (default: `False`)
 
-Template:
+Example:
 
 ```py
 from omni.isaac.lab import sim as sim_utils
