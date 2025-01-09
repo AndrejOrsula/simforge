@@ -6,7 +6,29 @@
 [![Docs](https://github.com/AndrejOrsula/simforge/actions/workflows/docs.yml/badge.svg)](https://github.com/AndrejOrsula/simforge/actions/workflows/docs.yml)
 [![Codecov](https://codecov.io/gh/AndrejOrsula/simforge/graph/badge.svg)](https://codecov.io/gh/AndrejOrsula/simforge)
 
-**SimForge** is a framework for creating diverse simulation environments through procedural generation.
+**SimForge** is a framework for creating diverse virtual environments through procedural generation.
+
+## Overview
+
+The framework implements a modular approach with three primary concepts: **Assets**, **Generators**, and **Integrations**.
+
+### Assets
+
+Assets are the registered building blocks that range from simple images and meshes to complex articulated models. Their definitions reside in external repositories that can be shared and reused across projects. Example: [SimForge Foundry](https://github.com/AndrejOrsula/simforge_foundry)
+
+### Generators
+
+Generators are responsible for automating the creation of **Assets** from their definitions in a deterministic manner. They interface with external tools and libraries to produce the desired output. Example: [Blender](https://blender.org)
+
+### Integrations
+
+Integrations seamlessly bridge the gap between the **Generators** and external frameworks such as game engines or physics simulators. These modules leverage domain-specific APIs to import and configure the generated **Assets**. Example: [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.md)
+
+## Documentation
+
+The full documentation is available in its raw form inside the [docs](docs) directory. The compiled version is hosted [online](https://AndrejOrsula.github.io/simforge) in a more accessible format.
+
+<a href="https://AndrejOrsula.github.io/simforge"> <img alt="HTML" src="https://github.com/AndrejOrsula/awesome-space-robotics/assets/22929099/3c8accf7-5acb-4bcd-9553-bf49cc622abe" width="96" height="96"></a>
 
 ## License
 

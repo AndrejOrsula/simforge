@@ -9,7 +9,7 @@ follow_imports = "silent"
 [project]
 name = "simforge"
 version = "0.1.1"
-description = "Diverse simulations through procedural generation"
+description = "Diverse virtual environments through procedural generation"
 authors = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
 maintainers = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
 urls = { Repository = "https://github.com/AndrejOrsula/simforge", Documentation = "https://AndrejOrsula.github.io/simforge" }

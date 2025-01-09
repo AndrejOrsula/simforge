@@ -216,7 +216,7 @@ def parse_cli_args() -> argparse.Namespace:
     """
 
     parser = argparse.ArgumentParser(
-        description="SimForge: Framework for creating diverse simulation environments",
+        description="SimForge: Framework for creating diverse virtual environments through procedural generation",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         argument_default=argparse.SUPPRESS,
     )
