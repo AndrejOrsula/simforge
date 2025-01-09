@@ -18,11 +18,11 @@ Assets are the registered building blocks that range from simple images and mesh
 
 ### Generators
 
-Generators are responsible for automating the creation of **Assets** from their definitions in a deterministic manner. They interface with external tools and libraries to produce the desired output. Example: [Blender](https://blender.org)
+Generators are responsible for automating the creation of **Assets** from their definitions in a deterministic manner. They interface with external tools and libraries to produce the desired output. Example: [Blender](https://AndrejOrsula.github.io/simforge/generators/blender.html)
 
 ### Integrations
 
-Integrations seamlessly bridge the gap between the **Generators** and external frameworks such as game engines or physics simulators. These modules leverage domain-specific APIs to import and configure the generated **Assets**. Example: [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.md)
+Integrations seamlessly bridge the gap between the **Generators** and external frameworks such as game engines or physics simulators. These modules leverage domain-specific APIs to import and configure the generated **Assets**. Example: [Isaac Lab](https://AndrejOrsula.github.io/simforge/integrations/isaaclab.html)
 
 ## Documentation
 

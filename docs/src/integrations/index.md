@@ -4,7 +4,7 @@ Integrations seamlessly bridge the gap between the [**Generators**](../generator
 
 ## Internal
 
-- [SimForge/Isaac Lab](isaaclab.md) - Configurable spawner for [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.md)
+- [SimForge/Isaac Lab](isaaclab.md) - Configurable spawner for [Isaac Lab](https://isaac-sim.github.io/IsaacLab/main/index.html)
 
 <!-- ## External -->
 
