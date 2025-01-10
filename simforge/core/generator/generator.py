@@ -255,9 +255,29 @@ class Generator(BaseModel):
     def generate_subprocess(
         self, asset: Asset, export_kwargs: Mapping[str, Any] = {}, **kwargs
     ) -> Sequence[Tuple[Path, Mapping[str, Any]]]:
-        # TODO: Get the output directly from the subprocess instead of preprocessing the asset, checking the cache and reading the metadata
         # Preprocess the asset
         self.preprocess_asset(asset)
+
+        # Check the cache first before running the subprocess
+        output = []
+        for seed in range(self.seed, self.seed + self.num_assets):
+            if cached_res := self.__check_cache(asset, seed):
+                # Collect "cached" output from the subprocess
+                output.append(cached_res)
+            elif seed == self.seed and seed > 0:
+                # Check if the asset is non-randomizable (generated once with seed = 0)
+                if cached_res := self.__check_cache(asset, 0):
+                    logging.info(
+                        f'Cached 1 non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
+                    )
+                    return [cached_res]
+            else:
+                break
+        if len(output) == self.num_assets:
+            logging.info(
+                f'Cached {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} from {self.__asset_filepath_base(asset)}'
+            )
+            return output
 
         # Ensure that the simforge package is installed
         self.__subprocess_ensure_sf_installed()
@@ -265,6 +285,7 @@ class Generator(BaseModel):
         # Run the subprocess
         self.__subprocess_run(self._subprocess_expr(asset, export_kwargs, **kwargs))
 
+        # Extract the output from the cache
         output = []
         for seed in range(self.seed, self.seed + self.num_assets):
             if cached_res := self.__check_cache(asset, seed):
@@ -276,8 +297,8 @@ class Generator(BaseModel):
                     return [cached_res]
             else:
                 logging.error(f"Subprocess failed to generate an asset (seed = {seed})")
-        if len(output) == 0:
-            raise ChildProcessError("Subprocess failed to generate any assets")
+        if len(output) != self.num_assets:
+            raise ChildProcessError("Subprocess failed to generate all assets")
         return output
 
     def _subprocess_expr(
