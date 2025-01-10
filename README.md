@@ -1,6 +1,7 @@
 <h1 align="center">SimForge</h1>
 
 [![PyPi](https://img.shields.io/pypi/v/simforge.svg)](https://pypi.python.org/pypi/simforge)
+[![Docs](https://img.shields.io/badge/docs-online-blue?logo=markdown)](https://AndrejOrsula.github.io/simforge)
 [![Python](https://github.com/AndrejOrsula/simforge/actions/workflows/python.yml/badge.svg)](https://github.com/AndrejOrsula/simforge/actions/workflows/python.yml)
 [![Docker](https://github.com/AndrejOrsula/simforge/actions/workflows/docker.yml/badge.svg)](https://github.com/AndrejOrsula/simforge/actions/workflows/docker.yml)
 [![Docs](https://github.com/AndrejOrsula/simforge/actions/workflows/docs.yml/badge.svg)](https://github.com/AndrejOrsula/simforge/actions/workflows/docs.yml)
