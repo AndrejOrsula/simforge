@@ -59,7 +59,7 @@ class ExampleNodes(BlGeometryNodesModifier):
 
 
 class ExampleGeo(BlGeometry):
-    ops: List[BlGeometryOp] = [ExampleNodes()]
+    ops: List[SerializeAsAny[BlGeometryOp]] = [ExampleNodes()]
 ```
 
 ### `BlMaterial`

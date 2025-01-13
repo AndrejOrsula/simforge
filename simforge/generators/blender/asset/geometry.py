@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, List
 
-from pydantic import InstanceOf
+from pydantic import InstanceOf, SerializeAsAny
 
 from simforge import Geometry
 from simforge.generators.blender.generator import BlGenerator
@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 
 class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
-    ops: List[InstanceOf[BlGeometryOp]]
+    ops: List[SerializeAsAny[InstanceOf[BlGeometryOp]]]
 
     @property
     def obj(self) -> "bpy.types.Object":
