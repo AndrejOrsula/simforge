@@ -4,26 +4,14 @@ from os import environ
 
 from simforge.utils.tracing import with_logfire, with_rich
 
-__all__ = [
-    "critical",
-    "debug",
-    "error",
-    "exception",
-    "fatal",
-    "info",
-    "log_level",
-    "logger",
-    "logging",
-    "set_log_level",
-    "warning",
-]
-
 # Create a logger
 logger = logging.getLogger("simforge")
+logger.propagate = False
 
 # Set the logger level
-logger.setLevel(environ.get("SF_LOG_LEVEL", "INFO").upper())
-
+logger.setLevel(
+    (environ.get("LOG_LEVEL") or environ.get("SF_LOG_LEVEL", "INFO")).upper()
+)
 
 # Set up console logging handlers (either rich or plain)
 if with_rich():
@@ -66,36 +54,17 @@ if with_logfire():
     logger.addHandler(LogfireLoggingHandler())
 
 
-def log_level() -> int:
-    return logger.level
-
-
-def set_log_level(level: str | int):
-    def _log_level_from_str(level: str) -> int:
-        match level.lower():
-            case "debug":
-                return logging.DEBUG
-            case "info":
-                return logging.INFO
-            case "warning":
-                return logging.WARNING
-            case "error":
-                return logging.ERROR
-            case "critical":
-                return logging.CRITICAL
-            case _:
-                return logging.NOTSET
-
-    if isinstance(level, str):
-        logger.setLevel(_log_level_from_str(level))
-    else:
-        logger.setLevel(level)
-
+__all__ = [
+    "logger",
+    "debug",
+    "info",
+    "warning",
+    "error",
+    "critical",
+]
 
 debug = logger.debug
 info = logger.info
 warning = logger.warning
 error = logger.error
 critical = logger.critical
-fatal = logger.fatal
-exception = logger.exception
