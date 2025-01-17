@@ -28,6 +28,8 @@ DOCKER_RUN_OPTS="${DOCKER_RUN_OPTS:-
 WITH_GPU="${WITH_GPU:-true}"
 # Flag to enable GUI (X11)
 WITH_GUI="${WITH_GUI:-false}"
+# Flag to enable mounting the command history as a volume
+WITH_HISTORY="${WITH_HISTORY:-true}"
 # Flag to enable mounting the source code as a volume
 WITH_DEV_VOLUME="${WITH_DEV_VOLUME:-true}"
 # Volumes to mount inside the container
@@ -40,13 +42,23 @@ DOCKER_VOLUMES=(
     # Cache
     "${HOME}/.cache/simforge:/root/.cache/simforge:rw"
 )
+# Environment variables to set inside the container
+DOCKER_ENVIRON=()
+
+if [[ "${WITH_HISTORY,,}" = true ]]; then
+    DOCKER_VOLUMES+=(
+        "${SCRIPT_DIR}/.history:/.history:rw"
+    )
+    DOCKER_ENVIRON+=(
+        HISTFILE="/.history/.bash_history"
+        PYTHON_HISTORY="/.history/.python_history"
+    )
+fi
 if [[ "${WITH_DEV_VOLUME,,}" = true ]]; then
     DOCKER_VOLUMES+=(
         "${REPOSITORY_DIR}:/root/ws:rw"
     )
 fi
-# Environment variables to set inside the container
-DOCKER_ENVIRON=()
 
 ## Determine the name of the image to run
 DOCKERHUB_USER="$(${WITH_SUDO} docker info 2>/dev/null | sed '/Username:/!d;s/.* //')"

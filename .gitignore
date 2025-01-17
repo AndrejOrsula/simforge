@@ -8,3 +8,10 @@ wheels/
 
 ## Virtual environments
 .venv
+
+## MdBook
+docs/book/
+docs/index.html
+
+## Docker History
+.docker/.history/
