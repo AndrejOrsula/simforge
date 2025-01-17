@@ -259,25 +259,26 @@ class Generator(BaseModel):
         self.preprocess_asset(asset)
 
         # Check the cache first before running the subprocess
-        output = []
-        for seed in range(self.seed, self.seed + self.num_assets):
-            if cached_res := self.__check_cache(asset, seed):
-                # Collect "cached" output from the subprocess
-                output.append(cached_res)
-            elif seed == self.seed and seed > 0:
-                # Check if the asset is non-randomizable (generated once with seed = 0)
-                if cached_res := self.__check_cache(asset, 0):
-                    logging.info(
-                        f'Cached 1 non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
-                    )
-                    return [cached_res]
-            else:
-                break
-        if len(output) == self.num_assets:
-            logging.info(
-                f'Cached {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} from {self.__asset_filepath_base(asset)}'
-            )
-            return output
+        if self.use_cache:
+            output = []
+            for seed in range(self.seed, self.seed + self.num_assets):
+                if cached_res := self.__check_cache(asset, seed):
+                    # Collect "cached" output from the subprocess
+                    output.append(cached_res)
+                elif seed == self.seed and seed > 0:
+                    # Check if the asset is non-randomizable (generated once with seed = 0)
+                    if cached_res := self.__check_cache(asset, 0):
+                        logging.info(
+                            f'Cached 1 non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
+                        )
+                        return [cached_res]
+                else:
+                    break
+            if len(output) == self.num_assets:
+                logging.info(
+                    f'Cached {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} from {self.__asset_filepath_base(asset)}'
+                )
+                return output
 
         # Ensure that the simforge package is installed
         self.__subprocess_ensure_sf_installed()
