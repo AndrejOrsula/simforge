@@ -11,8 +11,8 @@ from importlib.util import find_spec
 from pathlib import Path
 from typing import Any, Iterable, Literal, Mapping
 
-from simforge.core import AssetRegistry, FileFormat
-from simforge.utils import SF_CACHE_DIR, convert_to_snake_case, logging
+from simforge import SF_CACHE_DIR, AssetRegistry, AssetType, FileFormat
+from simforge.utils import convert_to_snake_case, logging
 
 
 def main():
@@ -33,7 +33,7 @@ def main():
 ### Generate ###
 def generate_assets(
     ## Input
-    assets: Iterable[str],
+    asset_name: Iterable[str],
     ## Output
     outdir: str,
     ext: Iterable[str],
@@ -47,18 +47,31 @@ def generate_assets(
     subprocess: bool,
     multiprocessing: bool,
 ):
-    for asset_name in assets:
-        asset_name = convert_to_snake_case(asset_name)
-        if asset_type := AssetRegistry.by_name(asset_name):
-            asset = asset_type()
-        else:
-            all_asset_names = (
-                f'"{convert_to_snake_case(asset.__name__)}"'
-                for asset in AssetRegistry.values_inner()
-            )
-            raise ValueError(
-                f'Asset "{asset_name}" not found among registered SimForge assets: {", ".join(all_asset_names)}'
-            )
+    if "ALL" in asset_name:
+        logging.info('Exporting "ALL" registered SimForge assets')
+        assets = (
+            asset()
+            for asset_type, assets in AssetRegistry.items()
+            for asset in assets
+            # Note: Material assets cannot yet be exported
+            if asset_type is not AssetType.MATERIAL
+        )
+    else:
+        assets = []
+        for name in asset_name:
+            name = convert_to_snake_case(name)
+            if asset := AssetRegistry.by_name(name):
+                assets.append(asset())
+            else:
+                all_names = (
+                    f'"{convert_to_snake_case(asset.__name__)}"'
+                    for asset in AssetRegistry.values_inner()
+                )
+                raise ValueError(
+                    f'Asset "{name}" not found among registered SimForge assets: {", ".join(all_names)}'
+                )
+
+    for asset in assets:
         generator = asset.generator_type(
             outdir=Path(outdir),
             seed=seed,
@@ -234,9 +247,9 @@ def parse_cli_args() -> argparse.Namespace:
     )
     group = generate_parser.add_argument_group("Input")
     group.add_argument(
-        dest="assets",
+        dest="asset_name",
         type=str,
-        help="Names of the assets to export",
+        help="Name of the asset to export (use 'ALL' to export all assets)",
         nargs="+",
     )
     group = generate_parser.add_argument_group("Output")

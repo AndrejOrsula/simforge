@@ -55,6 +55,7 @@ from simforge.generators import (  # noqa: E402
     BlTriangulateModifier,
     BlUnsubdivDecimateModifier,
 )
+from simforge.utils import SF_CACHE_DIR  # noqa: E402
 
 __all__ = (
     "Articulation",
@@ -98,6 +99,7 @@ __all__ = (
     "SemanticClass",
     "Semantics",
     "SemanticTag",
+    "SF_CACHE_DIR",
     "TexResConfig",
 )
 
