@@ -9,7 +9,17 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 ARG SF_PATH="/root/ws"
 WORKDIR "${SF_PATH}"
 
-## Install dependencies
+## Install system dependencies
+# hadolint ignore=DL3008
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
+    bash-completion \
+    libgl1 \
+    libxi6 \
+    libxkbcommon-x11-0 && \
+    rm -rf /var/lib/apt/lists/*
+
+## Install Python dependencies
 # hadolint ignore=DL3013,SC2046
 RUN --mount=type=bind,source=pyproject.toml,target="${SF_PATH}/pyproject.toml" \
     python -m pip install --no-input --no-cache-dir --upgrade pip && \
@@ -22,12 +32,19 @@ COPY . "${SF_PATH}"
 ## Install the project
 RUN python -m pip install --no-input --no-cache-dir --no-deps --editable "${SF_PATH}[all]"
 
+## Configure argcomplete
+RUN echo "source /etc/bash_completion" >> "/etc/bash.bashrc" && \
+    register-python-argcomplete simforge > "/etc/bash_completion.d/simforge"
+
 ## Set the default command
 CMD ["bash"]
 
 ############
 ### Misc ###
 ############
+
+## Downgrade numpy to suppress warnings
+RUN python -m pip install --no-input --no-cache-dir numpy~=1.26
 
 ## Skip writing Python bytecode to the disk to avoid polluting mounted host volume with `__pycache__` directories
 ENV PYTHONDONTWRITEBYTECODE=1
