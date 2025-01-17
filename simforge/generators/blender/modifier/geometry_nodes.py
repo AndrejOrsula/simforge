@@ -1,5 +1,6 @@
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, ClassVar
 
+from simforge.core.procgen import OpType
 from simforge.generators.blender.asset import BlGeometry, BlMaterial, BlModel
 from simforge.generators.blender.modifier.modifier import BlGeometryModifier
 from simforge.generators.blender.nodes import BlNodesManager
@@ -9,6 +10,9 @@ if TYPE_CHECKING:
 
 
 class BlGeometryNodesModifier(BlGeometryModifier, BlNodesManager):
+    OP_TYPE: ClassVar[OpType] = OpType.GENERATE
+    MODIFIER_TYPE: ClassVar[str] = "NODES"
+
     @property
     def is_randomizable(self) -> bool:
         return self.nodes.is_randomizable or self.affects_material_randomized
@@ -17,12 +21,8 @@ class BlGeometryNodesModifier(BlGeometryModifier, BlNodesManager):
         import bpy
 
         # Create a new nodes modifier
-        mod: bpy.types.NodesModifier = geo.obj.modifiers.new(
-            name=self.nodes.name, type="NODES"
-        )  # type: ignore
-
-        # Save the modifier name (Blender automatically renames on collision)
-        self._mod_name = mod.name
+        super().setup(geo)
+        mod: bpy.types.NodesModifier = geo.obj.modifiers[self._mod_name]  # type: ignore
 
         # Assign the nodes
         mod.node_group = self.nodes.group

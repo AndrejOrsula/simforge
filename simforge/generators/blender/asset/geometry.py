@@ -5,8 +5,10 @@ from typing import TYPE_CHECKING, List
 from pydantic import InstanceOf, SerializeAsAny
 
 from simforge import Geometry
+from simforge.core.procgen import OpType
 from simforge.generators.blender.generator import BlGenerator
 from simforge.generators.blender.procgen.proc_op import BlGeometryOp
+from simforge.utils import logging
 
 if TYPE_CHECKING:
     import bpy
@@ -50,7 +52,26 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
         self.obj.select_set(True)
 
         # Process all operations
-        for op in self.ops:
+        for i, op in enumerate(self.ops):
+            if i == 0:
+                if op.OP_TYPE != OpType.GENERATE:
+                    logging.warning(
+                        f'The first operation of "{BlGeometry.__name__}" shall be of type {OpType.GENERATE}: {op}'
+                    )
+            else:
+                if op.OP_TYPE == OpType.GENERATE:
+                    match i + 1:
+                        case 1:
+                            i_ord = "1st"
+                        case 2:
+                            i_ord = "2nd"
+                        case 3:
+                            i_ord = "3rd"
+                        case n:
+                            i_ord = f"{n}th"
+                    logging.warning(
+                        f'The {i_ord} operation of "{BlGeometry.__name__}" shall not be of type {OpType.GENERATE}: {op}'
+                    )
             op.setup(self)
 
         # Update the mesh

@@ -40,6 +40,7 @@ from simforge.core import (  # noqa: E402
 )
 from simforge.generators import (  # noqa: E402
     BlArticulation,
+    BlCollapseDecimateModifier,
     BlGeometry,
     BlGeometryModifier,
     BlGeometryNodesModifier,
@@ -49,7 +50,9 @@ from simforge.generators import (  # noqa: E402
     BlModel,
     BlNodes,
     BlNodesFromPython,
+    BlPlanarDecimateModifier,
     BlShader,
+    BlUnsubdivDecimateModifier,
 )
 
 __all__ = (
@@ -60,6 +63,7 @@ __all__ = (
     "Baker",
     "BakeType",
     "BlArticulation",
+    "BlCollapseDecimateModifier",
     "BlGeometry",
     "BlGeometryModifier",
     "BlGeometryNodesModifier",
@@ -69,7 +73,9 @@ __all__ = (
     "BlModel",
     "BlNodes",
     "BlNodesFromPython",
+    "BlPlanarDecimateModifier",
     "BlShader",
+    "BlUnsubdivDecimateModifier",
     "Exporter",
     "FileFormat",
     "FileFormatConfig",
