@@ -52,6 +52,7 @@ from simforge.generators import (  # noqa: E402
     BlNodesFromPython,
     BlPlanarDecimateModifier,
     BlShader,
+    BlTriangulateModifier,
     BlUnsubdivDecimateModifier,
 )
 
@@ -75,6 +76,7 @@ __all__ = (
     "BlNodesFromPython",
     "BlPlanarDecimateModifier",
     "BlShader",
+    "BlTriangulateModifier",
     "BlUnsubdivDecimateModifier",
     "Exporter",
     "FileFormat",
