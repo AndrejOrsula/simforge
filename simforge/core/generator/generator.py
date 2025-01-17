@@ -161,9 +161,14 @@ class Generator(BaseModel):
 
         # Check if multiple variants should be generated
         original_seed_range = None
-        if not asset.is_randomizable and self.num_assets > 1:
+        if not asset.is_randomizable and (self.num_assets != 1 or self.seed != 0):
+            if cached_res := self.__check_cache(asset, 0):
+                logging.info(
+                    f'Cached non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
+                )
+                return [cached_res]
             logging.warning(
-                f'Multiple variants ({self.num_assets}) cannot be generated for non-randomizable asset "{asset.name}"'
+                f'Non-randomizable asset "{asset.name}" will be generated only once with the seed of 0'
             )
             original_seed_range = (self.seed, self.num_assets)
             self.seed = 0
@@ -263,15 +268,7 @@ class Generator(BaseModel):
             output = []
             for seed in range(self.seed, self.seed + self.num_assets):
                 if cached_res := self.__check_cache(asset, seed):
-                    # Collect "cached" output from the subprocess
                     output.append(cached_res)
-                elif seed == self.seed and seed > 0:
-                    # Check if the asset is non-randomizable (generated once with seed = 0)
-                    if cached_res := self.__check_cache(asset, 0):
-                        logging.info(
-                            f'Cached 1 non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
-                        )
-                        return [cached_res]
                 else:
                     break
             if len(output) == self.num_assets:
@@ -290,16 +287,14 @@ class Generator(BaseModel):
         output = []
         for seed in range(self.seed, self.seed + self.num_assets):
             if cached_res := self.__check_cache(asset, seed):
-                # Collect "cached" output from the subprocess
                 output.append(cached_res)
-            elif seed == self.seed and seed > 0:
-                # Check if the asset is non-randomizable (generated once with seed = 0)
+            else:
                 if cached_res := self.__check_cache(asset, 0):
                     return [cached_res]
-            else:
-                logging.error(f"Subprocess failed to generate an asset (seed = {seed})")
-        if len(output) != self.num_assets:
-            raise ChildProcessError("Subprocess failed to generate all assets")
+                else:
+                    raise ChildProcessError(
+                        f'Subprocess failed to generate "{asset.name}" asset for seed {seed}'
+                    )
         return output
 
     def _subprocess_expr(
