@@ -7,11 +7,12 @@ import json
 import os
 import shutil
 import sys
+from functools import cache
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Iterable, Literal, Mapping
+from typing import Any, Iterable, Literal, Mapping, Sequence, Type
 
-from simforge import SF_CACHE_DIR, AssetRegistry, AssetType, FileFormat
+from simforge import SF_CACHE_DIR, Asset, AssetRegistry, AssetType, FileFormat
 from simforge.utils import convert_to_snake_case, logging
 
 
@@ -47,25 +48,21 @@ def generate_assets(
     subprocess: bool,
     multiprocessing: bool,
 ):
+    if asset_name == "NO_REGISTERED_ASSETS":
+        raise RuntimeError("No SimForge assets are registered")
+
     if "ALL" in asset_name:
-        logging.info('Exporting "ALL" registered SimForge assets')
-        assets = (
-            asset()
-            for asset_type, assets in AssetRegistry.items()
-            for asset in assets
-            # Note: Material assets cannot yet be exported
-            if asset_type is not AssetType.MATERIAL
-        )
+        assets = (asset() for asset in _get_registered_assets())
     else:
         assets = []
-        for name in asset_name:
+        for name in set(asset_name):
             name = convert_to_snake_case(name)
             if asset := AssetRegistry.by_name(name):
                 assets.append(asset())
             else:
                 all_names = (
                     f'"{convert_to_snake_case(asset.__name__)}"'
-                    for asset in AssetRegistry.values_inner()
+                    for asset in _get_registered_assets()
                 )
                 raise ValueError(
                     f'Asset "{name}" not found among registered SimForge assets: {", ".join(all_names)}'
@@ -222,6 +219,20 @@ def __get_dir_size(start_path: Path) -> int:
     return total_size
 
 
+### Utils ###
+
+
+@cache
+def _get_registered_assets() -> Sequence[Type[Asset]]:
+    return [
+        asset
+        for asset_type, assets in AssetRegistry.items()
+        for asset in assets
+        # Note: Material assets cannot yet be exported
+        if asset_type is not AssetType.MATERIAL
+    ]
+
+
 ### CLI ###
 def parse_cli_args() -> argparse.Namespace:
     """
@@ -246,11 +257,16 @@ def parse_cli_args() -> argparse.Namespace:
         argument_default=argparse.SUPPRESS,
     )
     group = generate_parser.add_argument_group("Input")
+    asset_names = [
+        convert_to_snake_case(asset.__name__) for asset in _get_registered_assets()
+    ]
     group.add_argument(
         dest="asset_name",
         type=str,
         help="Name of the asset to export (use 'ALL' to export all assets)",
-        nargs="+",
+        nargs="+" if asset_names else "*",
+        choices=("ALL", *asset_names) if asset_names else None,
+        default=None if asset_names else "NO_REGISTERED_ASSETS",
     )
     group = generate_parser.add_argument_group("Output")
     group.add_argument(
