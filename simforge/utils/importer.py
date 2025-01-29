@@ -12,6 +12,10 @@ DEFAULT_SF_MODULES = {"simforge_foundry"}
 
 
 def import_simforge_asset_modules():
+    if environ.get("SF_MODULES", "").lower() in ("none", "false", "0"):
+        logging.debug("Skipping automatic import of SimForge modules")
+        return
+
     for module in DEFAULT_SF_MODULES.union(
         module
         for module in map(str.strip, environ.get("SF_MODULES", "").split(","))
@@ -26,7 +30,10 @@ def import_simforge_asset_modules():
                 f'Failed to import SimForge assets from "{module}" (module not found)'
             )
             continue
-        import_recursively(module)
+        if environ.get("SF_MODULES_RECURSIVE", "false").lower() in ("true", "1"):
+            import_recursively(module)
+        else:
+            importlib.import_module(module)
 
         # Log the number of registered assets after importing the module
         n_assets_new = AssetRegistry.n_assets() - n_assets_old
@@ -36,7 +43,7 @@ def import_simforge_asset_modules():
             )
         else:
             logging.warning(
-                f'Automatically imported SimForge module "{module}" but no assets were registered'
+                f'Automatically imported SimForge module "{module}" but no new assets were registered'
             )
 
 
