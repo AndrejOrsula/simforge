@@ -136,7 +136,7 @@ class AssetRegistry:
         return {module.split(".", maxsplit=1)[0] for module in cls.registered_modules()}
 
     @classmethod
-    def by_name(cls, name: str) -> Type[Asset] | None:
+    def get_by_name(cls, name: str) -> Type[Asset] | None:
         for asset in cls.values_inner():
             if convert_to_snake_case(asset.__name__) == name:
                 return asset

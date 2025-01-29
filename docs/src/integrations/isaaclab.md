@@ -36,8 +36,8 @@ class ExampleSceneCfg(InteractiveSceneCfg):
         prim_path="{ENV_REGEX_NS}/asset1",
         spawn=SimforgeAssetCfg(
             assets=[
-                AssetRegistry.by_name("example_geo"),
-                AssetRegistry.by_name("example_model"),
+                AssetRegistry.get_by_name("example_geo"),
+                AssetRegistry.get_by_name("example_model"),
             ],
             num_assets=64,
             collision_props=sim_utils.CollisionPropertiesCfg(),

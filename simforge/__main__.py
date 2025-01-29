@@ -57,7 +57,7 @@ def generate_assets(
         assets = []
         for name in set(asset_name):
             name = convert_to_snake_case(name)
-            if asset := AssetRegistry.by_name(name):
+            if asset := AssetRegistry.get_by_name(name):
                 assets.append(asset())
             else:
                 all_names = (
@@ -367,7 +367,12 @@ def parse_cli_args() -> argparse.Namespace:
 
     args, unknown_args = parser.parse_known_args()
     if unknown_args:
-        unknown_args = (f'"{arg}"' if " " in arg else arg for arg in unknown_args)
+        import string
+
+        unknown_args = (
+            f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
+            for arg in unknown_args
+        )
         raise ValueError(f'Unknown args encountered: {" ".join(unknown_args)}')
 
     return args
