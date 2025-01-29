@@ -8,7 +8,7 @@ follow_imports = "silent"
 
 [project]
 name = "simforge"
-version = "0.1.2"
+version = "0.1.3"
 description = "Diverse virtual environments through procedural generation"
 authors = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
 maintainers = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
