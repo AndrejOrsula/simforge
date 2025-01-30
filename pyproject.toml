@@ -42,17 +42,49 @@ all = [
   "simforge[dev]",
 ]
 ## Assets
-assets = ["simforge[foundry]"]
-foundry = ["simforge_foundry"]
+assets = [
+  #
+  "simforge[foundry]",
+]
+foundry = [
+  #
+  "simforge_foundry",
+]
 ## Generators
-bpydev = ["simforge[bpy]", "fake-bpy-module"]
-bpy = ["bpy~=4.0"]
+bpydev = [
+  #
+  "simforge[bpy]",
+  "fake-bpy-module",
+]
+bpy = [
+  #
+  "bpy~=4.0",
+]
 ## Utils
-cli = ["simforge[rich]", "argcomplete~=1.0"]
-dev = ["simforge[test]", "simforge[tracing]", "devtools~=0.12"]
-rich = ["rich~=13.0"]
-test = ["pytest~=8.0"]
-tracing = ["simforge[rich]", "logfire~=2.0"]
+cli = [
+  #
+  "simforge[rich]",
+  "argcomplete~=3.0",
+]
+dev = [
+  #
+  "simforge[test]",
+  "simforge[tracing]",
+  "devtools~=0.12",
+]
+rich = [
+  #
+  "rich~=13.0",
+]
+test = [
+  #
+  "pytest~=8.0",
+]
+tracing = [
+  #
+  "simforge[rich]",
+  "logfire~=3.0",
+]
 
 [project.scripts]
 simforge = "simforge.__main__:main"
