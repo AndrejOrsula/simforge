@@ -367,7 +367,8 @@ class BlBaker(Baker):
 
         # Bake
         bpy.ops.object.bake(
-            type=cls._bake_pass_from_type(bake_type), pass_filter={"COLOR"}
+            type=cls._bake_pass_from_type(bake_type),  # type: ignore
+            pass_filter={"COLOR"},
         )
 
         # Cleanup materials: Remove the added texture node

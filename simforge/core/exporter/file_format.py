@@ -53,9 +53,17 @@ class ImageFileFormat(FileFormat):
     JPG = auto()
     PNG = auto()
 
+    @classmethod
+    def from_ext(cls, ext: str) -> ImageFileFormat:
+        return super().from_ext(ext)  # type: ignore
+
 
 class MaterialFileFormat(FileFormat):
     MDL = auto()
+
+    @classmethod
+    def from_ext(cls, ext: str) -> MaterialFileFormat:
+        return super().from_ext(ext)  # type: ignore
 
 
 class ModelFileFormat(FileFormat):
@@ -79,6 +87,10 @@ class ModelFileFormat(FileFormat):
                 return ""
             case _:
                 return super().ext
+
+    @classmethod
+    def from_ext(cls, ext: str) -> ModelFileFormat:
+        return super().from_ext(ext)  # type: ignore
 
     @property
     def supports_material(self) -> bool:

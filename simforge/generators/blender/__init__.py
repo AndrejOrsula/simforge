@@ -2,6 +2,7 @@ from .asset import *  # noqa: F403
 from .baker import *  # noqa: F403
 from .exporter import *  # noqa: F403
 from .generator import *  # noqa: F403
+from .importer import *  # noqa: F403
 from .modifier import *  # noqa: F403
 from .nodes import *  # noqa: F403
 from .procgen import *  # noqa: F403
