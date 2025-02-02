@@ -2,7 +2,7 @@ from collections.abc import Callable
 from dataclasses import MISSING
 from typing import Any, List, Mapping
 
-from omni.isaac.lab.utils import configclass
+from isaaclab.utils import configclass
 
 from simforge import Articulation, Geometry, Model
 from simforge.integrations.isaaclab.spawner.from_files import FileCfg

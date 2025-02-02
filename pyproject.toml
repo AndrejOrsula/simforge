@@ -70,7 +70,6 @@ dev = [
   #
   "simforge[test]",
   "simforge[tracing]",
-  "devtools~=0.12",
 ]
 rich = [
   #

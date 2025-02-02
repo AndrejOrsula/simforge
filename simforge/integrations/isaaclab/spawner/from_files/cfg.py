@@ -1,10 +1,8 @@
 from collections.abc import Callable
 
-from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import FileCfg as __FileCfg
-from omni.isaac.lab.sim.spawners.from_files.from_files_cfg import (
-    UsdFileCfg as __UsdFileCfg,
-)
-from omni.isaac.lab.utils import configclass
+from isaaclab.sim.spawners.from_files.from_files_cfg import FileCfg as __FileCfg
+from isaaclab.sim.spawners.from_files.from_files_cfg import UsdFileCfg as __UsdFileCfg
+from isaaclab.utils import configclass
 
 from simforge.integrations.isaaclab.schemas import MeshCollisionPropertiesCfg
 from simforge.integrations.isaaclab.spawner.from_files.impl import spawn_from_usd

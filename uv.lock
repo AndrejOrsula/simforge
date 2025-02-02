@@ -24,18 +24,6 @@ wheels = [
 ]
 
 [[package]]
-name = "asttokens"
-version = "2.4.1"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "six" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/45/1d/f03bcb60c4a3212e15f99a56085d93093a497718adf828d050b9d675da81/asttokens-2.4.1.tar.gz", hash = "sha256:b03869718ba9a6eb027e134bfdf69f38a236d681c83c160d510768af11254ba0", size = 62284 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/45/86/4736ac618d82a20d87d2f92ae19441ebc7ac9e7a581d7e58bbe79233b24a/asttokens-2.4.1-py2.py3-none-any.whl", hash = "sha256:051ed49c3dcae8913ea7cd08e46a606dba30b79993209636c4875bc1d637bc24", size = 27764 },
-]
-
-[[package]]
 name = "bpy"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -326,20 +314,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/98/97/06afe62762c9a8a86af0cfb7bfdab22a43ad17138b07af5b1a58442690a2/deprecated-1.2.18.tar.gz", hash = "sha256:422b6f6d859da6f2ef57857761bfb392480502a64c3028ca9bbe86085d72115d", size = 2928744 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/6e/c6/ac0b6c1e2d138f1002bcf799d330bd6d85084fece321e662a14223794041/Deprecated-1.2.18-py2.py3-none-any.whl", hash = "sha256:bd5011788200372a32418f888e326a09ff80d0214bd961147cfed01b5c018eec", size = 9998 },
-]
-
-[[package]]
-name = "devtools"
-version = "0.12.2"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "asttokens" },
-    { name = "executing" },
-    { name = "pygments" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/84/75/b78198620640d394bc435c17bb49db18419afdd6cfa3ed8bcfe14034ec80/devtools-0.12.2.tar.gz", hash = "sha256:efceab184cb35e3a11fa8e602cc4fadacaa2e859e920fc6f87bf130b69885507", size = 75005 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/d1/ae/afb1487556e2dc827a17097aac8158a25b433a345386f0e249f6d2694ccb/devtools-0.12.2-py3-none-any.whl", hash = "sha256:c366e3de1df4cdd635f1ad8cbcd3af01a384d7abda71900e68d43b04eb6aaca7", size = 19411 },
 ]
 
 [[package]]
@@ -831,7 +805,6 @@ all = [
     { name = "argcomplete" },
     { name = "bpy", version = "4.0.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
     { name = "bpy", version = "4.3.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.11'" },
-    { name = "devtools" },
     { name = "fake-bpy-module" },
     { name = "logfire" },
     { name = "pytest" },
@@ -855,7 +828,6 @@ cli = [
     { name = "rich" },
 ]
 dev = [
-    { name = "devtools" },
     { name = "logfire" },
     { name = "pytest" },
     { name = "rich" },
@@ -878,7 +850,6 @@ tracing = [
 requires-dist = [
     { name = "argcomplete", marker = "extra == 'cli'", specifier = "~=3.0" },
     { name = "bpy", marker = "extra == 'bpy'", specifier = "~=4.0" },
-    { name = "devtools", marker = "extra == 'dev'", specifier = "~=0.12" },
     { name = "fake-bpy-module", marker = "extra == 'bpydev'" },
     { name = "logfire", marker = "extra == 'tracing'", specifier = "~=3.0" },
     { name = "platformdirs", specifier = "~=4.0" },
@@ -909,15 +880,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/f6/9d/fdcaf828946b6a7cb195af963e3044691972115b68c15d009ad5d6d0ea64/simforge_foundry-0.1.0.tar.gz", hash = "sha256:1586fc0248d03557814c3a52b3de5f2bae7fd7e26e358d0545740a8b430d646d", size = 28706028 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/34/82/55b92abc571b63ac765a0609d8ce377cf8508da85b9f540b350f8a5a7ec7/simforge_foundry-0.1.0-py3-none-any.whl", hash = "sha256:38a05d19f62a7a7835525aee06fdba69beaac7c44e9b0a19c974724171739b8d", size = 187938 },
-]
-
-[[package]]
-name = "six"
-version = "1.17.0"
-source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050 },
 ]
 
 [[package]]

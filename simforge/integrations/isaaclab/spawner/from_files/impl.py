@@ -1,9 +1,9 @@
 from typing import TYPE_CHECKING, Tuple
 
-import omni.isaac.core.utils.prims as prim_utils
-import omni.isaac.core.utils.stage as stage_utils
-from omni.isaac.lab.sim import clone
-from omni.isaac.lab.sim.spawners.from_files.from_files import (
+import isaacsim.core.utils.prims as prim_utils
+import isaacsim.core.utils.stage as stage_utils
+from isaaclab.sim import clone
+from isaaclab.sim.spawners.from_files.from_files import (
     spawn_from_usd as __spawn_from_usd,
 )
 from pxr import PhysxSchema, Usd, UsdPhysics  # type: ignore

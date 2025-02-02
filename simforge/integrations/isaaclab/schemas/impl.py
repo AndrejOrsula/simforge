@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING
 
 import carb
-import omni.isaac.core.utils.stage as stage_utils
-from omni.isaac.lab.sim import apply_nested
+import isaacsim.core.utils.stage as stage_utils
+from isaaclab.sim import apply_nested
 from omni.physx.scripts import utils as physx_utils
 from pxr import PhysxSchema, Usd, UsdPhysics
 

@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING, Tuple
 
-from omni.isaac.lab.sim.spawners.wrappers import MultiAssetSpawnerCfg, spawn_multi_asset
+from isaaclab.sim.spawners.wrappers import MultiAssetSpawnerCfg, spawn_multi_asset
 from pxr import Usd
 
 from simforge import ModelFileFormat

@@ -1,7 +1,7 @@
 from collections.abc import Callable
 from typing import Literal
 
-from omni.isaac.lab.utils import configclass
+from isaaclab.utils import configclass
 
 from simforge.integrations.isaaclab.schemas.impl import set_mesh_collision_properties
 

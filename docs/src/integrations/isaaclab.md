@@ -4,7 +4,7 @@
 
 ## Requirements
 
-- [Isaac Lab 1.4](https://isaac-sim.github.io/IsaacLab/v1.4.0/source/setup/installation/index.html)
+- [Isaac Lab 2.0](https://isaac-sim.github.io/IsaacLab/v2.0.0/source/setup/installation/index.html)
 
 ## `SimforgeAssetCfg`
 
@@ -19,10 +19,10 @@ The `SimforgeAssetCfg` class is a `SpawnerCfg` (`FileCfg`) subclass that streaml
 Example:
 
 ```py
-from omni.isaac.lab import sim as sim_utils
-from omni.isaac.lab.assets import AssetBaseCfg, RigidObjectCfg
-from omni.isaac.lab.scene import InteractiveSceneCfg
-from omni.isaac.lab.utils import configclass
+from isaaclab import sim as sim_utils
+from isaaclab.assets import AssetBaseCfg, RigidObjectCfg
+from isaaclab.scene import InteractiveSceneCfg
+from isaaclab.utils import configclass
 from simforge import AssetRegistry
 from simforge.integrations.isaaclab import SimforgeAssetCfg
 from simforge_foundry import ExampleModel
