@@ -96,11 +96,11 @@ def generate_assets(
                 or i == (len(output) - 1)
             ):
                 loggable_output.append(
-                    f'{filepath}{(" | " + str(metadata) if metadata else "")}'
+                    f"{filepath}{(' | ' + str(metadata) if metadata else '')}"
                 )
             elif i == TRUNCATE_PRINT_N_FIRST:
                 loggable_output.append(
-                    f'{f"--- {len(output) - 6} more ---".center(len(filepath.with_suffix("").as_posix()) - 1)}*'
+                    f"{f'--- {len(output) - 6} more ---'.center(len(filepath.with_suffix('').as_posix()) - 1)}*"
                 )
         logging.debug("\n".join(loggable_output))
 
@@ -373,7 +373,7 @@ def parse_cli_args() -> argparse.Namespace:
             f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
             for arg in unknown_args
         )
-        raise ValueError(f'Unknown args encountered: {" ".join(unknown_args)}')
+        raise ValueError(f"Unknown args encountered: {' '.join(unknown_args)}")
 
     return args
 

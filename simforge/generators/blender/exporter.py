@@ -151,7 +151,7 @@ class BlModelExporter(ModelExporter):
             model, "link", attrib={"name": f"{model_name}_link"}
         )
         pose = ElementTree.SubElement(link, "pose")
-        pose.text = f"0 0 0 {math.pi/2} 0 0"
+        pose.text = f"0 0 0 {math.pi / 2} 0 0"
         visual = ElementTree.SubElement(
             link, "visual", attrib={"name": f"{model_name}_visual"}
         )

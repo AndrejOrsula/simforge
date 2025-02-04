@@ -85,6 +85,8 @@ class ModelFileFormat(FileFormat):
         match self:
             case ModelFileFormat.SDF:
                 return ""
+            case ModelFileFormat.GLTF:
+                return ModelFileFormat.GLB.ext
             case _:
                 return super().ext
 

@@ -32,7 +32,7 @@ class BlNodesManager(BaseModel, defer_build=True):
     def inputs(self) -> Mapping[str, Any]:
         inputs = {canonicalize_str(key): value for key, value in self._inputs.items()}
         for key in inputs.keys():
-            assert (
-                key in self.nodes.input_mapping.keys()
-            ), f'Field "{key}" of "{self.__class__.__name__}" is not a valid input for "{self.nodes.name}" nodes with inputs: {list(self.nodes.input_mapping.keys())}'
+            assert key in self.nodes.input_mapping.keys(), (
+                f'Field "{key}" of "{self.__class__.__name__}" is not a valid input for "{self.nodes.name}" nodes with inputs: {list(self.nodes.input_mapping.keys())}'
+            )
         return inputs

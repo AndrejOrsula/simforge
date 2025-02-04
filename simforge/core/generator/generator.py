@@ -213,7 +213,7 @@ class Generator(BaseModel):
             # Append the results to the output
             output.append((filepath, metadata))
             logging.info(
-                f"Generated asset ({str(i+1).rjust(self.__num_assets_width)}/{self.num_assets}): {filepath.name}"
+                f"Generated asset ({str(i + 1).rjust(self.__num_assets_width)}/{self.num_assets}): {filepath.name}"
             )
 
         # Clean-up
@@ -327,7 +327,7 @@ class Generator(BaseModel):
                 break
         else:
             install_args = (
-                "simforge" + extras + f'=={importlib.metadata.version("simforge")}',
+                "simforge" + extras + f"=={importlib.metadata.version('simforge')}",
             )
 
         expr = [

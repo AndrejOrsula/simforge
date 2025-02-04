@@ -78,6 +78,8 @@ rich = [
 test = [
   #
   "pytest~=8.0",
+  "pytest-order~=1.0",
+  "pytest-sugar~=1.0",
 ]
 tracing = [
   #
