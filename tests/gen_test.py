@@ -14,11 +14,12 @@ NO_CACHE: bool = True
 EXPORT_KWARGS: Mapping[str, Any] = {}
 SUBPROCESS: bool = not verify_bpy_version()
 MULTIPROCESSING: bool = False
+STANDARD_FORMAT: ModelFileFormat = ModelFileFormat.USDZ
 
 asset_types = _get_registered_assets()
 
 
-@pytest.mark.parametrize("ext", map(str, (ModelFileFormat.USDZ,)))
+@pytest.mark.parametrize("ext", map(str, (STANDARD_FORMAT,)))
 @pytest.mark.parametrize("asset_type", asset_types)
 def test_gen_all_assets(asset_type: Type[Asset], ext: str):
     with tempfile.TemporaryDirectory(prefix="simforge_") as tmpdir:
@@ -35,7 +36,10 @@ def test_gen_all_assets(asset_type: Type[Asset], ext: str):
         )
 
 
-@pytest.mark.parametrize("ext", map(str, ModelFileFormat))
+@pytest.mark.parametrize(
+    "ext",
+    map(str, filter(lambda format: format is not STANDARD_FORMAT, ModelFileFormat)),
+)
 @pytest.mark.parametrize("asset_type", (asset_types[0],) if asset_types else ())
 def test_gen_all_exts(asset_type: Type[Asset], ext: str):
     with tempfile.TemporaryDirectory(prefix="simforge_") as tmpdir:
