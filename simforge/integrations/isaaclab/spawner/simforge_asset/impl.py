@@ -7,7 +7,7 @@ from pxr import Usd
 from simforge import ModelFileFormat
 from simforge.integrations.isaaclab.spawner.from_files import UsdFileCfg
 from simforge.utils import logging
-from simforge.utils.color import color_palette
+from simforge.utils.color import color_palette_hue
 
 if TYPE_CHECKING:
     from simforge.integrations.isaaclab.spawner.simforge_asset.cfg import (
@@ -68,7 +68,7 @@ def spawn_simforge_assets(
 
     # Create and spawn multi-asset configuration
     if not any(has_material):
-        palette = color_palette(cfg.num_assets)
+        palette = color_palette_hue(cfg.num_assets)
     return spawn_multi_asset(
         prim_path=prim_path,
         cfg=MultiAssetSpawnerCfg(
@@ -78,10 +78,7 @@ def spawn_simforge_assets(
                     # semantic_tags=...,  # TODO: Extract semantics from assets
                     visual_material=None
                     if has_material[i * len(output) + j]
-                    else PreviewSurfaceCfg(
-                        diffuse_color=palette[i * len(output) + j],
-                        roughness=0.8,
-                    ),
+                    else PreviewSurfaceCfg(diffuse_color=palette[i * len(output) + j]),
                 )
                 for i, output in enumerate(generator_output)
                 for j, (filepath, _metadata) in enumerate(output)
