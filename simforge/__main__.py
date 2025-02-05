@@ -17,7 +17,9 @@ from simforge.utils import convert_to_snake_case, logging
 
 
 def main():
-    def impl(subcommand: Literal["gen", "ls", "clean"], **kwargs):
+    def impl(
+        subcommand: Literal["gen", "ls", "clean", "repl", "docs", "test"], **kwargs
+    ):
         match subcommand:
             case "gen":
                 generate_assets(**kwargs)
@@ -25,6 +27,12 @@ def main():
                 list_assets(**kwargs)
             case "clean":
                 clean_assets(**kwargs)
+            case "repl":
+                enter_repl(**kwargs)
+            case "docs":
+                serve_docs(**kwargs)
+            case "test":
+                run_tests(**kwargs)
             case _:
                 raise ValueError(f'Unknown subcommand: "{subcommand}"')
 
@@ -219,6 +227,89 @@ def __get_dir_size(start_path: Path) -> int:
     return total_size
 
 
+### REPL ###
+def enter_repl(**kwargs):
+    if not find_spec("ptpython"):
+        raise ImportError(
+            'The "ptpython" package is required to enter REPL of SimForge'
+        )
+
+    import ptpython
+
+    import simforge  # noqa: F401
+    from simforge.utils import logging  # noqa: F401
+
+    # Enter REPL
+    ptpython.repl.embed(globals(), locals(), title="SimForge")
+
+
+### Docs ###
+def serve_docs(forwarded_args: Sequence[str]):
+    import string
+    import subprocess
+
+    from simforge.utils import logging
+
+    if not shutil.which("mdbook"):
+        raise FileNotFoundError(
+            'The "mdbook" tool is required to serve the docs of SimForge'
+        )
+
+    cmd = (
+        "mdbook",
+        "serve",
+        Path(__file__).resolve().parent.parent.joinpath("docs").as_posix(),
+        "--open",
+        *forwarded_args,
+    )
+    logging.info(
+        "Serving the docs of SimForge with the following command: "
+        + " ".join(
+            (f'"{arg}"' if any(c in string.whitespace for c in arg) else arg)
+            for arg in cmd
+        )
+    )
+
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.critical("Serving the docs failed due to the exception above")
+        exit(e.returncode)
+
+
+### Test ###
+def run_tests(forwarded_args: Sequence[str]):
+    import string
+    import subprocess
+
+    from simforge.utils import logging
+
+    if not find_spec("pytest"):
+        raise ImportError('The "pytest" package is required to run tests of SimForge')
+
+    cmd = (
+        sys.executable,
+        "-m",
+        "pytest",
+        Path(__file__).resolve().parent.parent.as_posix(),
+        *forwarded_args,
+    )
+
+    logging.info(
+        "Running python tests of SimForge with the following command: "
+        + " ".join(
+            (f'"{arg}"' if any(c in string.whitespace for c in arg) else arg)
+            for arg in cmd
+        )
+    )
+
+    try:
+        subprocess.run(cmd, check=True)
+    except subprocess.CalledProcessError as e:
+        logging.critical("Running python tests failed due to the exception above")
+        exit(e.returncode)
+
+
 ### Utils ###
 
 
@@ -250,6 +341,7 @@ def parse_cli_args() -> argparse.Namespace:
         required=True,
     )
 
+    ## Generate subcommand
     generate_parser = subparsers.add_parser(
         "gen",
         help="Generate assets",
@@ -328,10 +420,11 @@ def parse_cli_args() -> argparse.Namespace:
         default=False,
     )
 
+    ## List subcommand
     list_parser = subparsers.add_parser(
         "ls",
         help="List registered assets"
-        + (' (MISSING: "rich" Python package)' if find_spec("rich") else ""),
+        + ("" if find_spec("rich") else ' (MISSING: "rich" Python package)'),
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
         argument_default=argparse.SUPPRESS,
     )
@@ -343,6 +436,7 @@ def parse_cli_args() -> argparse.Namespace:
         default=4,
     )
 
+    ## Clean subcommand
     clean_parser = subparsers.add_parser(
         "clean",
         help="Clean the cache directory",
@@ -357,23 +451,77 @@ def parse_cli_args() -> argparse.Namespace:
         default=False,
     )
 
+    ## REPL subcommand
+    _repl_parser = subparsers.add_parser(
+        "repl",
+        help="Enter REPL"
+        + ("" if find_spec("ptpython") else ' (MISSING: "ptpython" Python package)'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    ## Docs subcommand
+    _docs_parser = subparsers.add_parser(
+        "docs",
+        help="Serve documentation"
+        + ("" if shutil.which("mdbook") else ' (MISSING: "mdbook" tool)'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    ## Test subcommand
+    _test_parser = subparsers.add_parser(
+        "test",
+        help="Run tests"
+        + ("" if find_spec("pytest") else ' (MISSING: "pytest" Python package)'),
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+
+    # Trigger argcomplete
     if find_spec("argcomplete"):
         import argcomplete
 
         argcomplete.autocomplete(parser)
 
+    # Allow separation of arguments meant for other purposes
     if "--" in sys.argv:
-        sys.argv = [sys.argv[0], *sys.argv[(sys.argv.index("--") + 1) :]]
+        forwarded_args = sys.argv[(sys.argv.index("--") + 1) :]
+        sys.argv = sys.argv[: sys.argv.index("--")]
+    else:
+        forwarded_args = []
 
-    args, unknown_args = parser.parse_known_args()
-    if unknown_args:
+    # Parse arguments
+    args, unsupported_args = parser.parse_known_args()
+
+    # Add forwarded arguments
+    args.forwarded_args = forwarded_args
+
+    # Detect any unsupported arguments
+    if unsupported_args:
         import string
 
-        unknown_args = (
-            f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
-            for arg in unknown_args
+        raise ValueError(
+            f"Unsupported CLI argument{'s' if len(unsupported_args) > 1 else ''}: "
+            + ", ".join(
+                f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
+                for arg in unsupported_args
+            )
+            + (
+                (
+                    '\nUse "--" to separate arguments meant for spawned processes: '
+                    + " ".join(
+                        f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
+                        for arg in sys.argv
+                        if arg not in unsupported_args and arg != "--"
+                    )
+                    + " -- "
+                    + " ".join(
+                        f'"{arg}"' if any(c in string.whitespace for c in arg) else arg
+                        for arg in unsupported_args
+                    )
+                )
+                if args.subcommand in ("docs", "test")
+                else ""
+            )
         )
-        raise ValueError(f"Unknown args encountered: {' '.join(unknown_args)}")
 
     return args
 

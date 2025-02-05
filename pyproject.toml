@@ -64,6 +64,7 @@ bpy = [
 cli = [
   #
   "simforge[rich]",
+  "simforge[repl]",
   "argcomplete~=3.0",
 ]
 dev = [
@@ -85,6 +86,10 @@ tracing = [
   #
   "simforge[rich]",
   "logfire~=3.0",
+]
+repl = [
+  #
+  "ptpython~=3.0",
 ]
 
 [project.scripts]
