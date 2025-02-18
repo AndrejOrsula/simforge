@@ -1,10 +1,12 @@
 from typing import TYPE_CHECKING
 
 import carb
-import isaacsim.core.utils.stage as stage_utils
 from isaaclab.sim import apply_nested
+from isaacsim.core.utils.stage import get_current_stage
 from omni.physx.scripts import utils as physx_utils
-from pxr import PhysxSchema, Usd, UsdPhysics
+from pxr import Usd, UsdPhysics
+
+from pxr import PhysxSchema  # isort: skip
 
 if TYPE_CHECKING:
     from simforge.integrations.isaaclab.schemas.cfg import MeshCollisionPropertiesCfg
@@ -27,7 +29,7 @@ def set_mesh_collision_properties(
 
     # Apply mesh collision approximation
     if cfg.mesh_approximation is not None:
-        prim: Usd.Prim = stage_utils.get_current_stage().GetPrimAtPath(prim_path)
+        prim: Usd.Prim = get_current_stage().GetPrimAtPath(prim_path)
 
         if physx_utils.hasSchema(prim, "CollisionAPI"):
             carb.log_warn("CollisionAPI is already defined")

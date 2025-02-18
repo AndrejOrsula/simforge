@@ -76,9 +76,13 @@ def spawn_simforge_assets(
                 proto_cfg.replace(  # type: ignore
                     usd_path=filepath.as_posix(),
                     # semantic_tags=...,  # TODO: Extract semantics from assets
-                    visual_material=None
-                    if has_material[i * len(output) + j]
-                    else PreviewSurfaceCfg(diffuse_color=palette[i * len(output) + j]),
+                    visual_material=(
+                        None
+                        if has_material[i * len(output) + j]
+                        else PreviewSurfaceCfg(
+                            diffuse_color=palette[i * len(output) + j]
+                        )
+                    ),
                 )
                 for i, output in enumerate(generator_output)
                 for j, (filepath, _metadata) in enumerate(output)
