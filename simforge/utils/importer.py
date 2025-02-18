@@ -12,7 +12,7 @@ DEFAULT_SF_MODULES = {"simforge_foundry"}
 
 
 def import_simforge_asset_modules():
-    if environ.get("SF_MODULES", "").lower() in ("none", "false", "0"):
+    if environ.get("SF_MODULES", "").lower() in ("none", "null", "false", "0"):
         logging.debug("Skipping automatic import of SimForge modules")
         return
 
