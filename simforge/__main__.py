@@ -55,6 +55,8 @@ def generate_assets(
     ## Process
     subprocess: bool,
     multiprocessing: bool,
+    ## Misc
+    forwarded_args: Sequence[str] = (),
 ):
     if asset_name == "NO_REGISTERED_ASSETS":
         raise RuntimeError("No SimForge assets are registered")
@@ -114,7 +116,7 @@ def generate_assets(
 
 
 ### List ###
-def list_assets(hash_len: int):
+def list_assets(hash_len: int, forwarded_args: Sequence[str] = ()):
     if AssetRegistry.n_assets() == 0:
         raise ValueError("Cannot list SimForge assets because none are registered")
 
@@ -181,7 +183,7 @@ def list_assets(hash_len: int):
 
 
 ### Clean ###
-def clean_assets(yes: bool):
+def clean_assets(yes: bool, forwarded_args: Sequence[str] = ()):
     if not SF_CACHE_DIR.exists():
         logging.error(f"Cache directory {SF_CACHE_DIR} does not exist")
         exit(0)
@@ -228,7 +230,7 @@ def __get_dir_size(start_path: Path) -> int:
 
 
 ### REPL ###
-def enter_repl(**kwargs):
+def enter_repl(forwarded_args: Sequence[str] = ()):
     if not find_spec("ptpython"):
         raise ImportError(
             'The "ptpython" package is required to enter REPL of SimForge'
@@ -244,7 +246,7 @@ def enter_repl(**kwargs):
 
 
 ### Docs ###
-def serve_docs(forwarded_args: Sequence[str]):
+def serve_docs(forwarded_args: Sequence[str] = ()):
     import string
     import subprocess
 
@@ -278,7 +280,7 @@ def serve_docs(forwarded_args: Sequence[str]):
 
 
 ### Test ###
-def run_tests(forwarded_args: Sequence[str]):
+def run_tests(forwarded_args: Sequence[str] = ()):
     import string
     import subprocess
 
