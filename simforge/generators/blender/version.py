@@ -18,7 +18,7 @@ def verify_bpy_version() -> bool:
         current=bpy.app.version,
     ):
         logging.critical(
-            f"Current version of Blender 'bpy={bpy.app.version_string}' is not semantically compatible with requirement 'bpy^{'.'.join(map(str, BPY_SEMVER_MIN))}'"
+            f"Current version of Blender 'bpy={bpy.app.version_string}' is not semantically compatible with requirement 'bpy^{'.'.join(map(str, BPY_SEMVER_MIN))}' (assets might need to be generated inside a subprocess)"
         )
         return False
 
