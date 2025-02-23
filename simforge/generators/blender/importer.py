@@ -25,7 +25,7 @@ class BlModelImporter(BlGeometryOp):
         return Path(os.path.relpath(filepath.resolve(), SF_CACHE_DIR))
 
     @cached_property
-    def file_format(self) -> ModelFileFormat:
+    def file_format(self) -> ModelFileFormat | None:
         return ModelFileFormat.from_ext(self.filepath.suffix)
 
     @suppress_stdout
@@ -73,6 +73,8 @@ class BlModelImporter(BlGeometryOp):
                 )
             case ModelFileFormat.SDF:
                 raise NotImplementedError("Direct SDF import is not supported")
+            case _:
+                raise ValueError(f"Unsupported file format: {self.filepath}")
 
         # Join all imported objects into a single object
         bpy.ops.object.join()

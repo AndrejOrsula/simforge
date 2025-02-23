@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, List
 
 from pydantic import InstanceOf, SerializeAsAny
+from typing_extensions import Self
 
 from simforge import Geometry
 from simforge.core.procgen import OpType
@@ -99,7 +98,7 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
         # Update the mesh
         self.mesh.update()
 
-    def duplicate(self, name: str = "{NAME}") -> BlGeometry:
+    def duplicate(self, name: str = "{NAME}") -> Self:
         import bpy
 
         # Duplicate the object

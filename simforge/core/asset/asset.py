@@ -73,7 +73,7 @@ class Asset(BaseModel):
                             f'Cannot register multiple assets with an identical name: "{cls.__module__}:{cls.__name__}" already exists as "{next(asset for asset in AssetRegistry.registry[asset_type] if convert_to_snake_case(cls.__name__) == convert_to_snake_case(asset.__name__)).__module__}:{cls.__name__}"'
                         )
                     AssetRegistry.registry[asset_type].append(cls)
-                    return
+                    break
 
     @cached_property
     def asset_type(self) -> AssetType:

@@ -3,15 +3,13 @@ from __future__ import annotations
 from enum import Enum, auto
 from typing import ClassVar, Iterable, List, Type
 
+from typing_extensions import Self
+
 
 class FileFormat(str, Enum):
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)
         FileFormatRegistry.registry.append(cls)
-
-    @staticmethod
-    def all_formats() -> Iterable[FileFormat]:
-        return (format for formats in FileFormatRegistry.registry for format in formats)
 
     def __str__(self) -> str:
         return self.name.lower()
@@ -21,28 +19,30 @@ class FileFormat(str, Enum):
         return f".{self}"
 
     @classmethod
-    def from_ext(cls, ext: str) -> FileFormat:
-        try:
-            return next(
+    def from_ext(cls, ext: str) -> Self | None:
+        return next(
+            (
                 format
                 for format in cls
                 if (ext[1:] if ext.startswith(".") else ext).upper() == format.name
-            )
-        except StopIteration:
-            raise ValueError(f'Extension "{ext}" is not a valid "{cls.__name__}"')
+            ),
+            None,
+        )
+
+    @staticmethod
+    def all_formats() -> Iterable[FileFormat]:
+        return (format for formats in FileFormatRegistry.registry for format in formats)
 
     @classmethod
-    def from_ext_any(cls, ext: str) -> FileFormat:
-        try:
-            return next(
+    def from_ext_any(cls, ext: str) -> FileFormat | None:
+        return next(
+            (
                 format
                 for format in cls.all_formats()
                 if (ext[1:] if ext.startswith(".") else ext).upper() == format.name
-            )
-        except StopIteration:
-            raise ValueError(
-                f'Extension "{ext}" is not a valid "{FileFormat.__name__}"'
-            )
+            ),
+            None,
+        )
 
 
 class FileFormatRegistry:
@@ -54,16 +54,16 @@ class ImageFileFormat(FileFormat):
     PNG = auto()
 
     @classmethod
-    def from_ext(cls, ext: str) -> ImageFileFormat:
-        return super().from_ext(ext)  # type: ignore
+    def from_ext(cls, ext: str) -> Self | None:
+        return super().from_ext(ext)
 
 
 class MaterialFileFormat(FileFormat):
     MDL = auto()
 
     @classmethod
-    def from_ext(cls, ext: str) -> MaterialFileFormat:
-        return super().from_ext(ext)  # type: ignore
+    def from_ext(cls, ext: str) -> Self | None:
+        return super().from_ext(ext)
 
 
 class ModelFileFormat(FileFormat):
@@ -91,8 +91,8 @@ class ModelFileFormat(FileFormat):
                 return super().ext
 
     @classmethod
-    def from_ext(cls, ext: str) -> ModelFileFormat:
-        return super().from_ext(ext)  # type: ignore
+    def from_ext(cls, ext: str) -> Self | None:
+        return super().from_ext(ext)
 
     @property
     def supports_material(self) -> bool:

@@ -83,7 +83,7 @@ def generate_assets(
             outdir=Path(outdir),
             seed=seed,
             num_assets=num_assets,
-            file_format=[FileFormat.from_ext_any(e) for e in ext],
+            file_format=[FileFormat.from_ext_any(e) for e in ext],  # type: ignore
             use_cache=not no_cache,
         )
         if subprocess:
