@@ -1,4 +1,4 @@
-from typing import TYPE_CHECKING, Tuple
+from typing import TYPE_CHECKING, Any, Tuple
 
 import isaacsim.core.utils.prims as prim_utils
 import isaacsim.core.utils.stage as stage_utils
@@ -6,7 +6,9 @@ from isaaclab.sim import clone
 from isaaclab.sim.spawners.from_files.from_files import (
     spawn_from_usd as __spawn_from_usd,
 )
-from pxr import PhysxSchema, Usd, UsdGeom, UsdPhysics
+from pxr import Usd, UsdGeom, UsdPhysics
+
+from pxr import PhysxSchema  # isort: skip
 
 if TYPE_CHECKING:
     from simforge.integrations.isaaclab.spawner.from_files.cfg import (
@@ -33,7 +35,7 @@ def spawn_from_usd(
         )
 
     # Apply missing APIs
-    __apply_missing_apis(prim_path, cfg)
+    _apply_missing_apis(prim_path, cfg)
 
     # Apply mesh collision API and properties
     if cfg.mesh_collision_props is not None:
@@ -42,60 +44,114 @@ def spawn_from_usd(
     return __spawn_from_usd(prim_path, cfg, translation, orientation)
 
 
-def __apply_missing_apis(prim_path: str, cfg: "FileCfg"):
+def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
     parent_prim: Usd.Prim = stage_utils.get_current_stage().GetPrimAtPath(prim_path)
 
-    if cfg.articulation_props is not None:
-        articulation_root_prim: Usd.Prim | None = None
-        _queue = [parent_prim]
-        while _queue:
-            child_prim = _queue.pop(0)
-            if child_prim.HasAPI(UsdPhysics.ArticulationRootAPI):
-                articulation_root_prim = child_prim
-                break
-            _queue.extend(child_prim.GetChildren())
-        if articulation_root_prim is None:
-            UsdPhysics.ArticulationRootAPI.Apply(parent_prim)
+    if cfg.articulation_props is not None and not __has_child_with_api(
+        parent_prim,
+        UsdPhysics.ArticulationRootAPI,  # type: ignore
+    ):
+        UsdPhysics.ArticulationRootAPI.Apply(parent_prim)  # type: ignore
 
-    if cfg.fixed_tendons_props is not None:
-        fixed_tendon_root_prim: Usd.Prim | None = None
-        _queue = [parent_prim]
-        while _queue:
-            child_prim = _queue.pop(0)
-            if child_prim.HasAPI(PhysxSchema.PhysxTendonAxisRootAPI):
-                fixed_tendon_root_prim = child_prim
-                break
-            _queue.extend(child_prim.GetChildren())
-        if fixed_tendon_root_prim is None:
-            PhysxSchema.PhysxTendonAxisRootAPI.Apply(parent_prim)
+    queue = [parent_prim]
+    while queue:
+        child_prim = queue.pop(0)
+        queue.extend(child_prim.GetChildren())
 
-    for child_prim in parent_prim.GetChildren():
         if (
-            child_prim.IsA(UsdGeom.Xform)
-            or child_prim.IsA(UsdGeom.Mesh)
-            or child_prim.IsA(UsdGeom.Gprim)
+            cfg.joint_drive_props is not None
+            and (
+                child_prim.IsA(UsdPhysics.Joint)  # type: ignore
+                and not child_prim.IsA(UsdPhysics.FixedJoint)  # type: ignore
+            )
+            and not child_prim.HasAPI(UsdPhysics.DriveAPI)  # type: ignore
         ):
-            if cfg.collision_props is not None and not child_prim.HasAPI(
-                UsdPhysics.CollisionAPI
-            ):
-                UsdPhysics.CollisionAPI.Apply(child_prim)
+            UsdPhysics.DriveAPI.Apply(child_prim)  # type: ignore
 
-            if cfg.rigid_props is not None and not child_prim.HasAPI(
-                UsdPhysics.RigidBodyAPI
-            ):
-                UsdPhysics.RigidBodyAPI.Apply(child_prim)
+        else:
+            if child_prim.IsA(UsdGeom.Xformable):
+                if (
+                    cfg.rigid_props is not None
+                    and not __has_child_with_api(
+                        child_prim,
+                        UsdPhysics.RigidBodyAPI,  # type: ignore
+                    )
+                    and not __has_parent_with_api(
+                        child_prim,
+                        UsdPhysics.RigidBodyAPI,  # type: ignore
+                    )
+                ):
+                    UsdPhysics.RigidBodyAPI.Apply(child_prim)  # type: ignore
 
-            if cfg.mass_props is not None and not child_prim.HasAPI(UsdPhysics.MassAPI):
-                UsdPhysics.MassAPI.Apply(child_prim)
+                if (
+                    cfg.mass_props is not None
+                    and __has_parent_with_api(
+                        child_prim,
+                        UsdPhysics.RigidBodyAPI,  # type: ignore
+                    )
+                    and not __has_child_with_api_or_instance(
+                        child_prim,
+                        UsdPhysics.MassAPI,  # type: ignore
+                    )
+                    and not __has_parent_with_api(
+                        child_prim,
+                        UsdPhysics.MassAPI,  # type: ignore
+                    )
+                ):
+                    UsdPhysics.MassAPI.Apply(child_prim)  # type: ignore
 
-            if cfg.deformable_props is not None and not child_prim.HasAPI(
-                PhysxSchema.PhysxDeformableBodyAPI
-            ):
-                PhysxSchema.PhysxDeformableBodyAPI.Apply(child_prim)
-        elif child_prim.IsA(UsdPhysics.Joint) and not child_prim.IsA(
-            UsdPhysics.FixedJoint
-        ):
-            if cfg.joint_drive_props is not None and not child_prim.HasAPI(
-                UsdPhysics.DriveAPI
-            ):
-                UsdPhysics.DriveAPI.Apply(child_prim)
+            if child_prim.IsA(UsdGeom.Gprim):
+                if (
+                    cfg.collision_props is not None
+                    and not __has_child_with_api_or_instance(
+                        child_prim,
+                        UsdPhysics.CollisionAPI,  # type: ignore
+                    )
+                    and not __has_parent_with_api(
+                        child_prim,
+                        UsdPhysics.CollisionAPI,  # type: ignore
+                    )
+                ):
+                    UsdPhysics.CollisionAPI.Apply(child_prim)  # type: ignore
+
+                if (
+                    cfg.deformable_props is not None
+                    and not __has_child_with_api_or_instance(
+                        child_prim,
+                        PhysxSchema.PhysxDeformableBodyAPI,  # type: ignore
+                    )
+                    and not __has_parent_with_api(
+                        child_prim,
+                        PhysxSchema.PhysxDeformableBodyAPI,  # type: ignore
+                    )
+                ):
+                    PhysxSchema.PhysxDeformableBodyAPI.Apply(child_prim)  # type: ignore
+
+
+def __has_parent_with_api(child_prim: Usd.Prim, api_schema: Any) -> bool:
+    prim = child_prim
+    while prim.IsValid():
+        if prim.HasAPI(api_schema):
+            return True
+        prim = prim.GetParent()
+    return False
+
+
+def __has_child_with_api(parent_prim: Usd.Prim, api_schema: Any) -> bool:
+    queue = [parent_prim]
+    while queue:
+        child_prim = queue.pop(0)
+        if child_prim.HasAPI(api_schema):
+            return True
+        queue.extend(child_prim.GetChildren())
+    return False
+
+
+def __has_child_with_api_or_instance(parent_prim: Usd.Prim, api_schema: Any) -> bool:
+    queue = [parent_prim]
+    while queue:
+        child_prim = queue.pop(0)
+        if child_prim.IsInstance() or child_prim.HasAPI(api_schema):
+            return True
+        queue.extend(child_prim.GetChildren())
+    return False

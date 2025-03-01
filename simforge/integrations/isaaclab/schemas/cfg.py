@@ -26,5 +26,5 @@ class MeshCollisionPropertiesCfg:
     ) = None
     """Collision approximation to use for the collision shape"""
 
-    sdf_resolution: int = 160
+    sdf_resolution: int = 128
     """Resolution of the SDF grid used for collision approximation"""
