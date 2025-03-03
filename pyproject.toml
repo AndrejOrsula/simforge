@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [tool.mypy]
 plugins = ["pydantic.mypy"]
-follow_imports = "silent"
+ignore_missing_imports = true
 
 [project]
 name = "simforge"
@@ -64,6 +64,7 @@ bpy = [
 cli = [
   #
   "simforge[rich]",
+  "simforge[repl]",
   "argcomplete~=3.0",
 ]
 dev = [
@@ -78,11 +79,17 @@ rich = [
 test = [
   #
   "pytest~=8.0",
+  "pytest-order~=1.0",
+  "pytest-sugar~=1.0",
 ]
 tracing = [
   #
   "simforge[rich]",
   "logfire~=3.0",
+]
+repl = [
+  #
+  "ptpython~=3.0",
 ]
 
 [project.scripts]
