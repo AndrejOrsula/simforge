@@ -51,12 +51,12 @@ class Asset(BaseModel):
     ):
         super().__init_subclass__(**kwargs)
         if asset_entrypoint is not None:
-            assert isinstance(
-                asset_entrypoint, AssetType
-            ), f'Class "{cls.__name__}" is marked as an asset entrypoint, but "{asset_entrypoint}" is not a valid {AssetType}'
-            assert (
-                asset_entrypoint not in AssetRegistry.base_types.keys()
-            ), f'Class "{cls.__name__}" is marked as "{asset_entrypoint}" asset entrypoint, but it was already marked by "{AssetRegistry.base_types[asset_entrypoint].__name__}"'
+            assert isinstance(asset_entrypoint, AssetType), (
+                f'Class "{cls.__name__}" is marked as an asset entrypoint, but "{asset_entrypoint}" is not a valid {AssetType}'
+            )
+            assert asset_entrypoint not in AssetRegistry.base_types.keys(), (
+                f'Class "{cls.__name__}" is marked as "{asset_entrypoint}" asset entrypoint, but it was already marked by "{AssetRegistry.base_types[asset_entrypoint].__name__}"'
+            )
             AssetRegistry.base_types[asset_entrypoint] = cls
         elif asset_metaclass:
             AssetRegistry.meta_types[cls] = asset_generator
@@ -66,14 +66,14 @@ class Asset(BaseModel):
                     if asset_type not in AssetRegistry.registry.keys():
                         AssetRegistry.registry[asset_type] = []
                     else:
-                        assert (
-                            convert_to_snake_case(cls.__name__)
-                            not in (
-                                convert_to_snake_case(asset.__name__)
-                                for asset in AssetRegistry.registry[asset_type]
-                            )
-                        ), f'Cannot register multiple assets with an identical name: "{cls.__module__}:{cls.__name__}" already exists as "{next(asset for asset in AssetRegistry.registry[asset_type] if convert_to_snake_case(cls.__name__) == convert_to_snake_case(asset.__name__)).__module__}:{cls.__name__}"'
+                        assert convert_to_snake_case(cls.__name__) not in (
+                            convert_to_snake_case(asset.__name__)
+                            for asset in AssetRegistry.registry[asset_type]
+                        ), (
+                            f'Cannot register multiple assets with an identical name: "{cls.__module__}:{cls.__name__}" already exists as "{next(asset for asset in AssetRegistry.registry[asset_type] if convert_to_snake_case(cls.__name__) == convert_to_snake_case(asset.__name__)).__module__}:{cls.__name__}"'
+                        )
                     AssetRegistry.registry[asset_type].append(cls)
+                    break
 
     @cached_property
     def asset_type(self) -> AssetType:

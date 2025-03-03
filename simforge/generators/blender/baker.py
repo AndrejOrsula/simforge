@@ -256,9 +256,9 @@ class BlBaker(Baker):
                         for input in group_output_node.inputs
                         if input.type == "SHADER"
                     )
-                    assert (
-                        group_output_node_shader_input_socket.is_linked
-                    ), "The input socket of a shader node group output must be linked"
+                    assert group_output_node_shader_input_socket.is_linked, (
+                        "The input socket of a shader node group output must be linked"
+                    )
                     group_output_node_shader_link = (
                         group_output_node_shader_input_socket.links[0]  # type: ignore
                     )
@@ -367,7 +367,8 @@ class BlBaker(Baker):
 
         # Bake
         bpy.ops.object.bake(
-            type=cls._bake_pass_from_type(bake_type), pass_filter={"COLOR"}
+            type=cls._bake_pass_from_type(bake_type),  # type: ignore
+            pass_filter={"COLOR"},
         )
 
         # Cleanup materials: Remove the added texture node

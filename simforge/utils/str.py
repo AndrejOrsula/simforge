@@ -1,7 +1,7 @@
 import functools
 import re
 
-_REGEX_CANONICALIZE_STR_PATTERN = re.compile("[\W_]+")  # type: ignore
+_REGEX_CANONICALIZE_STR_PATTERN = re.compile(r"[\W_]+")
 _REGEX_SNAKE_CASE_PATTERN = (
     re.compile(r"(.)([A-Z][a-z]+)"),
     re.compile(r"__([A-Z])"),
