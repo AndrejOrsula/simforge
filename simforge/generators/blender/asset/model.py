@@ -21,8 +21,11 @@ class BlModel(Model, asset_metaclass=True, asset_generator=BlGenerator):
     def requires_baking(self) -> bool:
         return self.mat is not None or self.geo.affects_material
 
-    def setup(self):
-        self.geo.setup(name=self.name)
+    def setup(self, name: str | None = None):
+        if name is None:
+            name = self.name
+
+        self.geo.setup(name=name)
         if material := self.mat:
             material.setup()
             self.geo.mesh.materials.append(material.mat)

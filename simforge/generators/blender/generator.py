@@ -98,7 +98,7 @@ class BlGenerator(Generator):
         **kwargs,
     ) -> Dict[str, Any]:
         # Create prototype asset
-        asset.setup()
+        asset.setup(name=f"proto_{asset.name}")
 
         # If required, realize instances for all node-based modifiers
         if self._should_realize_instances:
@@ -116,7 +116,7 @@ class BlGenerator(Generator):
         import bpy
 
         # Duplicate the prototype asset
-        duplicate_geom = asset.duplicate(name=f"{{NAME}}{seed}")
+        duplicate_geom = asset.duplicate()
 
         # Seed the duplicated asset
         duplicate_geom.seed(seed)
@@ -177,7 +177,7 @@ class BlGenerator(Generator):
         **kwargs,
     ) -> Dict[str, Any]:
         # Create prototype asset
-        asset.setup()
+        asset.setup(name=f"proto_{asset.name}")
 
         # If required, realize instances for all node-based modifiers
         if self._should_realize_instances:
@@ -196,7 +196,7 @@ class BlGenerator(Generator):
         import bpy
 
         # Duplicate the prototype asset
-        duplicate_geom = asset.geo.duplicate(name=f"{{NAME}}{seed}")
+        duplicate_geom = asset.geo.duplicate(name=asset.name)
 
         # Seed the duplicated asset
         duplicate_geom.seed(seed)

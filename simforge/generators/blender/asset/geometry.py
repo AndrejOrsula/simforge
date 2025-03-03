@@ -1,8 +1,7 @@
-from __future__ import annotations
-
 from typing import TYPE_CHECKING, List
 
 from pydantic import InstanceOf, SerializeAsAny
+from typing_extensions import Self
 
 from simforge import Geometry
 from simforge.core.procgen import OpType
@@ -42,7 +41,7 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
             name = self.name
 
         # Create a new mesh object
-        self._mesh = bpy.data.meshes.new(name)
+        self._mesh = bpy.data.meshes.new(f"{name}_mesh")
         self._obj = bpy.data.objects.new(name, self.mesh)
 
         # Link, make active and select the object
@@ -99,16 +98,19 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
         # Update the mesh
         self.mesh.update()
 
-    def duplicate(self, name: str = "{NAME}") -> BlGeometry:
+    def duplicate(self, name: str | None = None) -> Self:
         import bpy
+
+        if name is None:
+            name = self.name
 
         # Duplicate the object
         duplicate_obj = self.obj.copy()
         duplicate_obj.data = self.mesh.copy()
 
         # Rename the object
-        duplicate_obj.name = name.replace("{NAME}", self.obj.name)
-        duplicate_obj.data.name = name.replace("{NAME}", self.mesh.name)
+        duplicate_obj.name = name
+        duplicate_obj.data.name = f"{name}_mesh"
 
         # Link, make active and select the object
         context: bpy.types.Context = bpy.context  # type: ignore
