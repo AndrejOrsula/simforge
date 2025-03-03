@@ -10,7 +10,9 @@ logger.propagate = False
 
 # Set the logger level
 logger.setLevel(
-    (environ.get("LOG_LEVEL") or environ.get("SF_LOG_LEVEL", "INFO")).upper()
+    (environ.get("LOG_LEVEL") or environ.get("SF_LOG_LEVEL", "INFO"))
+    .upper()
+    .replace("TRACE", "DEBUG")
 )
 
 # Set up console logging handlers (either rich or plain)
