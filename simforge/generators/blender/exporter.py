@@ -11,7 +11,7 @@ from simforge.utils import suppress_stdout
 class BlModelExporter(ModelExporter):
     render_thumbnail: bool = True
 
-    @cached_property
+    @property
     def export_kwargs(self) -> Dict[str, Any]:
         match self.file_format:
             case ModelFileFormat.ABC:
