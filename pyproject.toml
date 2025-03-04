@@ -8,7 +8,7 @@ ignore_missing_imports = true
 
 [project]
 name = "simforge"
-version = "0.1.3"
+version = "0.2.0"
 description = "Diverse virtual environments through procedural generation"
 authors = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]
 maintainers = [{ name = "Andrej Orsula", email = "orsula.andrej@gmail.com" }]

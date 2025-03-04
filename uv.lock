@@ -1,4 +1,5 @@
 version = 1
+revision = 1
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.11'",
@@ -876,7 +877,7 @@ wheels = [
 
 [[package]]
 name = "simforge"
-version = "0.1.3"
+version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "platformdirs" },
@@ -966,6 +967,7 @@ requires-dist = [
     { name = "simforge", extras = ["tracing"], marker = "extra == 'dev'" },
     { name = "simforge-foundry", marker = "extra == 'foundry'" },
 ]
+provides-extras = ["all", "assets", "foundry", "bpydev", "bpy", "cli", "dev", "rich", "test", "tracing", "repl"]
 
 [[package]]
 name = "simforge-foundry"
