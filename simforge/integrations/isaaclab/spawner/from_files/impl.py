@@ -66,7 +66,7 @@ def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
             )
             and not child_prim.HasAPI(UsdPhysics.DriveAPI)  # type: ignore
         ):
-            UsdPhysics.DriveAPI.Apply(child_prim)  # type: ignore
+            UsdPhysics.DriveAPI.Apply(child_prim, f"{child_prim.GetName()}_drive")  # type: ignore
 
         else:
             if child_prim.IsA(UsdGeom.Xformable):
