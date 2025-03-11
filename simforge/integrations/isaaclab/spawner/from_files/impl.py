@@ -53,7 +53,7 @@ def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
     ):
         UsdPhysics.ArticulationRootAPI.Apply(parent_prim)  # type: ignore
 
-    queue = [parent_prim]
+    queue = parent_prim.GetChildren()
     while queue:
         child_prim = queue.pop(0)
         queue.extend(child_prim.GetChildren())
@@ -69,36 +69,35 @@ def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
             UsdPhysics.DriveAPI.Apply(child_prim, f"{child_prim.GetName()}_drive")  # type: ignore
 
         else:
-            if child_prim.IsA(UsdGeom.Xformable):
-                if (
-                    cfg.rigid_props is not None
-                    and not __has_child_with_api(
-                        child_prim,
-                        UsdPhysics.RigidBodyAPI,  # type: ignore
-                    )
-                    and not __has_parent_with_api(
-                        child_prim,
-                        UsdPhysics.RigidBodyAPI,  # type: ignore
-                    )
-                ):
-                    UsdPhysics.RigidBodyAPI.Apply(child_prim)  # type: ignore
+            if child_prim.IsA(UsdGeom.Xform) and (
+                cfg.rigid_props is not None
+                and not __has_child_with_api(
+                    child_prim,
+                    UsdPhysics.RigidBodyAPI,  # type: ignore
+                )
+                and not __has_parent_with_api(
+                    child_prim,
+                    UsdPhysics.RigidBodyAPI,  # type: ignore
+                )
+            ):
+                UsdPhysics.RigidBodyAPI.Apply(child_prim)  # type: ignore
 
-                if (
-                    cfg.mass_props is not None
-                    and __has_parent_with_api(
-                        child_prim,
-                        UsdPhysics.RigidBodyAPI,  # type: ignore
-                    )
-                    and not __has_child_with_api_or_instance(
-                        child_prim,
-                        UsdPhysics.MassAPI,  # type: ignore
-                    )
-                    and not __has_parent_with_api(
-                        child_prim,
-                        UsdPhysics.MassAPI,  # type: ignore
-                    )
-                ):
-                    UsdPhysics.MassAPI.Apply(child_prim)  # type: ignore
+            if child_prim.IsA(UsdGeom.Xformable) and (
+                cfg.mass_props is not None
+                and __has_parent_with_api(
+                    child_prim,
+                    UsdPhysics.RigidBodyAPI,  # type: ignore
+                )
+                and not __has_child_with_api_or_instance(
+                    child_prim,
+                    UsdPhysics.MassAPI,  # type: ignore
+                )
+                and not __has_parent_with_api(
+                    child_prim,
+                    UsdPhysics.MassAPI,  # type: ignore
+                )
+            ):
+                UsdPhysics.MassAPI.Apply(child_prim)  # type: ignore
 
             if child_prim.IsA(UsdGeom.Gprim):
                 if (
