@@ -1,5 +1,4 @@
 version = 1
-revision = 1
 requires-python = ">=3.10"
 resolution-markers = [
     "python_full_version >= '3.11'",
@@ -26,11 +25,11 @@ wheels = [
 
 [[package]]
 name = "argcomplete"
-version = "3.5.3"
+version = "3.6.0"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/0c/be/6c23d80cb966fb8f83fb1ebfb988351ae6b0554d0c3a613ee4531c026597/argcomplete-3.5.3.tar.gz", hash = "sha256:c12bf50eded8aebb298c7b7da7a5ff3ee24dffd9f5281867dfe1424b58c55392", size = 72999 }
+sdist = { url = "https://files.pythonhosted.org/packages/ee/be/29abccb5d9f61a92886a2fba2ac22bf74326b5c4f55d36d0a56094630589/argcomplete-3.6.0.tar.gz", hash = "sha256:2e4e42ec0ba2fff54b0d244d0b1623e86057673e57bafe72dda59c64bd5dee8b", size = 73135 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/08/2a4db06ec3d203124c967fc89295e85a202e5cbbcdc08fd6a64b65217d1e/argcomplete-3.5.3-py3-none-any.whl", hash = "sha256:2ab2c4a215c59fd6caaff41a869480a23e8f6a5f910b266c1808037f4e375b61", size = 43569 },
+    { url = "https://files.pythonhosted.org/packages/08/94/e786d91ccc3a1fc664c20332825b73da20928eb067cdc984b821948a1acc/argcomplete-3.6.0-py3-none-any.whl", hash = "sha256:4e3e4e10beb20e06444dbac0ac8dda650cb6349caeefe980208d3c548708bedd", size = 43769 },
 ]
 
 [[package]]
@@ -346,23 +345,23 @@ wheels = [
 
 [[package]]
 name = "fake-bpy-module"
-version = "20250303"
+version = "20250311"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/13/ed/1afd717938fe3d946f2d96a44c7be0755b494b86ebe0913c1a1a111d6711/fake_bpy_module-20250303.tar.gz", hash = "sha256:4f143f8c4838d0f5ba3cc3cfc457cccaf06c4df8feabb63e36dc67070a95bda5", size = 950450 }
+sdist = { url = "https://files.pythonhosted.org/packages/17/b0/3b471449860fdad581709f280e038dec046f1062e38dd97a6de1c636bad5/fake_bpy_module-20250311.tar.gz", hash = "sha256:6ba88d3a79f935a8a5d3a6ef27de7d4395728243cb46702de198665dd750ebdd", size = 951019 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/92/91/d44f80ac3ba7ea98d5b1f5fdda129aeb43cd80ae1c26c4d85377c6b661d1/fake_bpy_module-20250303-py3-none-any.whl", hash = "sha256:3addefcfc8f6eebdf1034766a7ca74ed039ddb904f3b9d38a11524ed6c672bbf", size = 1075753 },
+    { url = "https://files.pythonhosted.org/packages/73/c1/0295ecb40fe20ae4190f4f0dacb3f274a77b8a798a7304794305b04b65e9/fake_bpy_module-20250311-py3-none-any.whl", hash = "sha256:bc1de473f33681d3f293712e10fe60f8d147b7a55d5c52f19d6be84403031cd6", size = 1076308 },
 ]
 
 [[package]]
 name = "googleapis-common-protos"
-version = "1.69.0"
+version = "1.69.1"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "protobuf" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c2/92/6bb11dad062ad7cc40665d0a8986193d54f1a0032b510e84e7182df9e661/googleapis_common_protos-1.69.0.tar.gz", hash = "sha256:5a46d58af72846f59009b9c4710425b9af2139555c71837081706b213b298187", size = 61264 }
+sdist = { url = "https://files.pythonhosted.org/packages/41/4f/d8be74b88621131dfd1ed70e5aff2c47f2bdf2289a70736bbf3eb0e7bc70/googleapis_common_protos-1.69.1.tar.gz", hash = "sha256:e20d2d8dda87da6fe7340afbbdf4f0bcb4c8fae7e6cadf55926c31f946b0b9b1", size = 144514 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/1d/66/0025e2b7a2ae353acea03cf9d4a96ae32ef02c116944e2eb11f559cf4b7b/googleapis_common_protos-1.69.0-py2.py3-none-any.whl", hash = "sha256:17835fdc4fa8da1d61cfe2d4d5d57becf7c61d4112f8d81c67eaa9d7ce43042d", size = 169749 },
+    { url = "https://files.pythonhosted.org/packages/16/cb/2f4aa605b16df1e031dd7c322c597613eef933e8dd5b6a4414330b21e791/googleapis_common_protos-1.69.1-py2.py3-none-any.whl", hash = "sha256:4077f27a6900d5946ee5a369fab9c8ded4c0ef1c6e880458ea2f70c14f7b70d5", size = 293229 },
 ]
 
 [[package]]
@@ -409,7 +408,7 @@ wheels = [
 
 [[package]]
 name = "logfire"
-version = "3.6.4"
+version = "3.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "executing" },
@@ -421,9 +420,9 @@ dependencies = [
     { name = "tomli", marker = "python_full_version < '3.11'" },
     { name = "typing-extensions" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9c/34/3ee5a691d22dd0935b42673e21577f01c46554b4526c10912a25ebb477bb/logfire-3.6.4.tar.gz", hash = "sha256:6933aa6ae4625a100238a37ed33f4ad03db5ea063520c28ca023fe4853429526", size = 269621 }
+sdist = { url = "https://files.pythonhosted.org/packages/a2/7c/ccd2aa47da9154788f0846864481b194695ca38db486500ae207b2c9f995/logfire-3.8.0.tar.gz", hash = "sha256:dc64745641d077e9411836c0d17af08f4fcef2737545dc43b67e51b20679e88b", size = 292729 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c4/ee/f56ba29655b0e75ce4dc7cbc157ed32ccb850e771c6dc8f78cd3221b8b17/logfire-3.6.4-py3-none-any.whl", hash = "sha256:907cd6b7ffee4e9e9c30f620a3f5cb4fa44b81ef6d3e23c33f0fbe02fc3584fc", size = 181272 },
+    { url = "https://files.pythonhosted.org/packages/77/d2/5644fab9b42c9f6de2dfe202666e125349d08d963d2f788aa44780d4da71/logfire-3.8.0-py3-none-any.whl", hash = "sha256:a2cda4d7bfb3a3a21bf99aa5c94bde6edff405ffa312b4dcbf8b99a8d52bf32e", size = 186976 },
 ]
 
 [[package]]
@@ -877,7 +876,7 @@ wheels = [
 
 [[package]]
 name = "simforge"
-version = "0.2.0"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "platformdirs" },
@@ -967,19 +966,18 @@ requires-dist = [
     { name = "simforge", extras = ["tracing"], marker = "extra == 'dev'" },
     { name = "simforge-foundry", marker = "extra == 'foundry'" },
 ]
-provides-extras = ["all", "assets", "foundry", "bpydev", "bpy", "cli", "dev", "rich", "test", "tracing", "repl"]
 
 [[package]]
 name = "simforge-foundry"
-version = "0.1.0"
+version = "0.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "pytest-cov" },
     { name = "simforge" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/f6/9d/fdcaf828946b6a7cb195af963e3044691972115b68c15d009ad5d6d0ea64/simforge_foundry-0.1.0.tar.gz", hash = "sha256:1586fc0248d03557814c3a52b3de5f2bae7fd7e26e358d0545740a8b430d646d", size = 28706028 }
+sdist = { url = "https://files.pythonhosted.org/packages/22/d3/7283c5d49ac07a0172a2c0b165097bd44e4670f46054d910aebb9b88d63e/simforge_foundry-0.2.0.tar.gz", hash = "sha256:446d2388ffcb02bc0177b08f120e9f26383417651f450030bf3b1f6a2ca5368e", size = 28837303 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/34/82/55b92abc571b63ac765a0609d8ce377cf8508da85b9f540b350f8a5a7ec7/simforge_foundry-0.1.0-py3-none-any.whl", hash = "sha256:38a05d19f62a7a7835525aee06fdba69beaac7c44e9b0a19c974724171739b8d", size = 187938 },
+    { url = "https://files.pythonhosted.org/packages/72/32/047b0363914dba9bb88dfd94c52071dd562073e6c9374390b15a163fbd1f/simforge_foundry-0.2.0-py3-none-any.whl", hash = "sha256:597f9c056ac4b8dd4dd518447ad87b4b1249c46030d3499cba0e6673955e9e59", size = 188093 },
 ]
 
 [[package]]
