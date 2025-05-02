@@ -23,7 +23,7 @@ class BlModel(Model, asset_metaclass=True, asset_generator=BlGenerator):
 
     def setup(self, name: str | None = None):
         if name is None:
-            name = self.name
+            name = self.name()
 
         self.geo.setup(name=name)
         if material := self.mat:

@@ -38,7 +38,7 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
         import bpy
 
         if name is None:
-            name = self.name
+            name = self.name()
 
         # Create a new mesh object
         self._mesh = bpy.data.meshes.new(f"{name}_mesh")
@@ -102,7 +102,7 @@ class BlGeometry(Geometry, asset_metaclass=True, asset_generator=BlGenerator):
         import bpy
 
         if name is None:
-            name = self.name
+            name = self.name()
 
         # Duplicate the object
         duplicate_obj = self.obj.copy()

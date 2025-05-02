@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from functools import cached_property
+from functools import cache, cached_property
 from typing import TYPE_CHECKING, ClassVar, Dict, Iterable, List, Sequence, Tuple, Type
 
 from pydantic import BaseModel
@@ -16,9 +16,10 @@ if TYPE_CHECKING:
 class Asset(BaseModel):
     SEMANTICS: ClassVar[Semantics] = Semantics()
 
-    @cached_property
-    def name(self) -> str:
-        return convert_to_snake_case(self.__class__.__name__)
+    @classmethod
+    @cache
+    def name(cls) -> str:
+        return convert_to_snake_case(cls.__name__)
 
     @property
     def is_randomizable(self) -> bool:
@@ -66,11 +67,10 @@ class Asset(BaseModel):
                     if asset_type not in AssetRegistry.registry.keys():
                         AssetRegistry.registry[asset_type] = []
                     else:
-                        assert convert_to_snake_case(cls.__name__) not in (
-                            convert_to_snake_case(asset.__name__)
-                            for asset in AssetRegistry.registry[asset_type]
+                        assert cls.name() not in (
+                            asset.name() for asset in AssetRegistry.registry[asset_type]
                         ), (
-                            f'Cannot register multiple assets with an identical name: "{cls.__module__}:{cls.__name__}" already exists as "{next(asset for asset in AssetRegistry.registry[asset_type] if convert_to_snake_case(cls.__name__) == convert_to_snake_case(asset.__name__)).__module__}:{cls.__name__}"'
+                            f'Cannot register multiple assets with an identical name: "{cls.__module__}:{cls.__name__}" already exists as "{next(asset for asset in AssetRegistry.registry[asset_type] if cls.name() == asset.name()).__module__}:{cls.__name__}"'
                         )
                     AssetRegistry.registry[asset_type].append(cls)
                     break
@@ -138,6 +138,6 @@ class AssetRegistry:
     @classmethod
     def get_by_name(cls, name: str) -> Type[Asset] | None:
         for asset in cls.values_inner():
-            if convert_to_snake_case(asset.__name__) == name:
+            if asset.name() == name:
                 return asset
         return None

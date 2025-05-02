@@ -70,10 +70,7 @@ def generate_assets(
             if asset := AssetRegistry.get_by_name(name):
                 assets.append(asset())
             else:
-                all_names = (
-                    f'"{convert_to_snake_case(asset.__name__)}"'
-                    for asset in _get_registered_assets()
-                )
+                all_names = (f'"{asset.name()}"' for asset in _get_registered_assets())
                 raise ValueError(
                     f'Asset "{name}" not found among registered SimForge assets: {", ".join(all_names)}'
                 )
@@ -138,7 +135,7 @@ def list_assets(hash_len: int, forwarded_args: Sequence[str] = ()):
         cache_dir_for_type = SF_CACHE_DIR.joinpath(str(asset_type))
         for j, asset_class in enumerate(asset_classes):
             i += 1
-            asset_name = convert_to_snake_case(asset_class.__name__)
+            asset_name = asset_class.name()
             pkg_name = asset_class.__module__.split(".", 1)[0]
             asset_cache_dir = cache_dir_for_type.joinpath(asset_name)
             asset_cache = {
@@ -351,9 +348,7 @@ def parse_cli_args() -> argparse.Namespace:
         argument_default=argparse.SUPPRESS,
     )
     group = generate_parser.add_argument_group("Input")
-    asset_names = [
-        convert_to_snake_case(asset.__name__) for asset in _get_registered_assets()
-    ]
+    asset_names = [asset.name() for asset in _get_registered_assets()]
     group.add_argument(
         dest="asset_name",
         type=str,

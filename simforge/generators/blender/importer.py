@@ -82,13 +82,13 @@ class BlModelImporter(BlGeometryOp):
         # Use the active object as the object of the geometry
         if obj := bpy.context.active_object:
             geo._obj = obj
-            geo._obj.name = geo.name
+            geo._obj.name = geo.name()
         else:
             raise ValueError(
                 f"No active object is available after importing {self.filepath}"
             )
         if isinstance(geo.obj.data, bpy.types.Mesh):
             geo._mesh = geo.obj.data
-            geo._mesh.name = geo.name
+            geo._mesh.name = geo.name()
         else:
             raise ValueError(f"Active object {geo.obj} does not have a mesh data block")

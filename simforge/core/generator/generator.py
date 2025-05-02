@@ -109,7 +109,7 @@ class Generator(BaseModel):
         self.preprocess_asset(asset)
 
         logging.info(
-            f'Requested {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
+            f'Requested {self.num_assets} "{asset.name()}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
         )
 
         # Map asset type to callables
@@ -164,11 +164,11 @@ class Generator(BaseModel):
         if not asset.is_randomizable and (self.num_assets != 1 or self.seed != 0):
             if cached_res := self.__check_cache(asset, 0):
                 logging.info(
-                    f'Cached non-randomizable "{asset.name}" asset from {self.__asset_filepath_base(asset)}'
+                    f'Cached non-randomizable "{asset.name()}" asset from {self.__asset_filepath_base(asset)}'
                 )
                 return [cached_res]
             logging.warning(
-                f'Non-randomizable asset "{asset.name}" will be generated only once with the seed of 0'
+                f'Non-randomizable asset "{asset.name()}" will be generated only once with the seed of 0'
             )
             original_seed_range = (self.seed, self.num_assets)
             self.seed = 0
@@ -230,15 +230,15 @@ class Generator(BaseModel):
         match n_cached:
             case 0:
                 logging.info(
-                    f'Generated {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
+                    f'Generated {self.num_assets} "{asset.name()}" asset{"s" if self.num_assets > 1 else ""} at {self.__asset_filepath_base(asset)}'
                 )
             case _all if n_cached == self.num_assets:
                 logging.info(
-                    f'Cached {n_cached} "{asset.name}" asset{"s" if n_cached > 1 else ""} from {self.__asset_filepath_base(asset)}'
+                    f'Cached {n_cached} "{asset.name()}" asset{"s" if n_cached > 1 else ""} from {self.__asset_filepath_base(asset)}'
                 )
             case _:
                 logging.info(
-                    f'Cached {n_cached} and generated {self.num_assets - n_cached} "{asset.name}" assets at {self.__asset_filepath_base(asset)}'
+                    f'Cached {n_cached} and generated {self.num_assets - n_cached} "{asset.name()}" assets at {self.__asset_filepath_base(asset)}'
                 )
 
         return output
@@ -273,7 +273,7 @@ class Generator(BaseModel):
                     break
             if len(output) == self.num_assets:
                 logging.info(
-                    f'Cached {self.num_assets} "{asset.name}" asset{"s" if self.num_assets > 1 else ""} from {self.__asset_filepath_base(asset)}'
+                    f'Cached {self.num_assets} "{asset.name()}" asset{"s" if self.num_assets > 1 else ""} from {self.__asset_filepath_base(asset)}'
                 )
                 return output
 
@@ -293,7 +293,7 @@ class Generator(BaseModel):
                     return [cached_res]
                 else:
                     raise ChildProcessError(
-                        f'Subprocess failed to generate "{asset.name}" asset for seed {seed}'
+                        f'Subprocess failed to generate "{asset.name()}" asset for seed {seed}'
                     )
         return output
 
@@ -361,14 +361,14 @@ class Generator(BaseModel):
     ) -> Path:
         return (
             self.__asset_filepath_base(asset)
-            .joinpath(asset.name + str(seed))
+            .joinpath(asset.name() + str(seed))
             .with_suffix(self.exporters[asset.asset_type].file_format.ext)
         )
 
     def __asset_filepath_base(self, asset: Asset) -> Path:
         return (
             self.outdir.joinpath(str(asset.asset_type))
-            .joinpath(asset.name)
+            .joinpath(asset.name())
             .joinpath(
                 md5_hexdigest_from_pydantic(
                     self.BAKER, self.exporters[asset.asset_type], asset
