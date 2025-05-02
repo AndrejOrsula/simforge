@@ -5,6 +5,7 @@ from typing_extensions import Self
 
 class BakeType(str, Enum):
     ALBEDO = auto()
+    ALPHA = auto()
     EMISSION = auto()
     METALLIC = auto()
     NORMAL = auto()
