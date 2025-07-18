@@ -18,9 +18,9 @@ class BlModelExporter(ModelExporter):
                 return {"selected": True}
             case ModelFileFormat.FBX:
                 return {"use_selection": True}
-            case ModelFileFormat.GLB | ModelFileFormat.GLTF | ModelFileFormat.SDF:
+            case ModelFileFormat.GLB | ModelFileFormat.GLTF:
                 return {"use_selection": True}
-            case ModelFileFormat.OBJ:
+            case ModelFileFormat.OBJ | ModelFileFormat.SDF:
                 return {"export_selected_objects": True}
             case ModelFileFormat.PLY:
                 return {"export_selected_objects": True}
@@ -138,10 +138,10 @@ class BlModelExporter(ModelExporter):
         filepath_mesh = (
             filepath.joinpath("meshes")
             .joinpath(model_name)
-            .with_suffix(ModelFileFormat.GLB.ext)
+            .with_suffix(ModelFileFormat.OBJ.ext)
         )
         filepath_mesh.parent.mkdir(parents=True, exist_ok=True)
-        bpy.ops.export_scene.gltf(filepath=filepath_mesh.as_posix(), **kwargs)
+        bpy.ops.wm.obj_export(filepath=filepath_mesh.as_posix(), **kwargs)
 
         # Write SDF
         filepath_sdf = filepath.joinpath("model.sdf")
