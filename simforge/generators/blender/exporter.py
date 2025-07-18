@@ -1,5 +1,6 @@
 import math
 from functools import cached_property
+from os import environ
 from pathlib import Path
 from typing import Any, Dict
 
@@ -9,7 +10,10 @@ from simforge.utils import suppress_stdout
 
 
 class BlModelExporter(ModelExporter):
-    render_thumbnail: bool = True
+    render_thumbnail: bool = environ.get("SF_RENDER_THUMBNAIL", "false").lower() in (
+        "true",
+        "1",
+    )
 
     @property
     def export_kwargs(self) -> Dict[str, Any]:
@@ -20,8 +24,17 @@ class BlModelExporter(ModelExporter):
                 return {"use_selection": True}
             case ModelFileFormat.GLB | ModelFileFormat.GLTF:
                 return {"use_selection": True}
-            case ModelFileFormat.OBJ | ModelFileFormat.SDF:
-                return {"export_selected_objects": True}
+            case ModelFileFormat.OBJ:
+                return {
+                    "export_material_groups": True,
+                    "export_pbr_extensions": True,
+                    "path_mode": "COPY",
+                }
+            case ModelFileFormat.SDF:  # DAE
+                return {
+                    "selected": True,
+                    "apply_modifiers": True,
+                }
             case ModelFileFormat.PLY:
                 return {"export_selected_objects": True}
             case ModelFileFormat.STL:
@@ -136,12 +149,10 @@ class BlModelExporter(ModelExporter):
 
         # Export mesh
         filepath_mesh = (
-            filepath.joinpath("meshes")
-            .joinpath(model_name)
-            .with_suffix(ModelFileFormat.OBJ.ext)
+            filepath.joinpath("meshes").joinpath(model_name).with_suffix(".dae")
         )
         filepath_mesh.parent.mkdir(parents=True, exist_ok=True)
-        bpy.ops.wm.obj_export(filepath=filepath_mesh.as_posix(), **kwargs)
+        bpy.ops.wm.collada_export(filepath=filepath_mesh.as_posix(), **kwargs)
 
         # Write SDF
         filepath_sdf = filepath.joinpath("model.sdf")
