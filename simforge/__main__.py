@@ -10,7 +10,21 @@ import sys
 from functools import cache
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Iterable, Literal, Mapping, Sequence, Type
+from typing import (
+    Annotated,
+    Any,
+    Iterable,
+    Literal,
+    Mapping,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    get_args,
+    get_origin,
+)
+
+from pydantic import BaseModel
 
 from simforge import SF_CACHE_DIR, Asset, AssetRegistry, AssetType, FileFormat
 from simforge.utils import convert_to_snake_case, logging
@@ -18,13 +32,16 @@ from simforge.utils import convert_to_snake_case, logging
 
 def main():
     def impl(
-        subcommand: Literal["gen", "ls", "clean", "repl", "docs", "test"], **kwargs
+        subcommand: Literal["gen", "ls", "info", "clean", "repl", "docs", "test"],
+        **kwargs,
     ):
         match subcommand:
             case "gen":
                 generate_assets(**kwargs)
             case "ls":
                 list_assets(**kwargs)
+            case "info":
+                show_info(**kwargs)
             case "clean":
                 clean_assets(**kwargs)
             case "repl":
@@ -66,8 +83,7 @@ def generate_assets(
     else:
         assets = []
         for name in set(asset_name):
-            name = convert_to_snake_case(name)
-            if asset := AssetRegistry.get_by_name(name):
+            if asset := AssetRegistry.get_by_name(convert_to_snake_case(name)):
                 assets.append(asset())
             else:
                 all_names = (f'"{asset.name()}"' for asset in _get_registered_assets())
@@ -177,6 +193,176 @@ def list_assets(hash_len: int, forwarded_args: Sequence[str] = ()):
             )
 
     print(table)
+
+
+### Info ###
+def show_info(
+    asset_name: Iterable[str],
+    attribute_blocklist: Sequence[str],
+    forwarded_args: Sequence[str] = (),
+):
+    if AssetRegistry.n_assets() == 0:
+        raise ValueError("Cannot list SimForge assets because none are registered")
+
+    if not find_spec("rich"):
+        raise ImportError('The "rich" package is required to list SimForge assets')
+    from rich import print
+    from rich.markup import escape
+    from rich.table import Table
+
+    if "ALL" in asset_name:
+        asset_name = (asset.name() for asset in _get_registered_assets())
+
+    for name in asset_name:
+        asset_class = AssetRegistry.get_by_name(convert_to_snake_case(name))
+        if not asset_class:
+            all_names = (f'"{asset.name()}"' for asset in _get_registered_assets())
+            raise ValueError(
+                f'Asset "{name}" not found among registered SimForge assets: {", ".join(all_names)}'
+            )
+
+        asset = asset_class()
+        attributes = _get_asset_attributes(
+            asset,
+            attribute_blocklist=attribute_blocklist,
+        )
+
+        table = Table(
+            title=f'Configurable attributes for "{name}"',
+            show_header=True,
+            header_style="bold magenta",
+        )
+        table.add_column("Name", style="cyan")
+        table.add_column("Type", style="green")
+        table.add_column("Default", style="yellow")
+
+        for name, type_hint, default in attributes:
+            table.add_row(name, escape(type_hint), escape(str(default)))
+
+        print(table)
+
+
+def _get_asset_attributes(
+    model: BaseModel, attribute_blocklist: Sequence[str], prefix: str = ""
+) -> list[tuple[str, str, str]]:
+    attributes = []
+    for name, field in model.model_fields.items():
+        path = f"{prefix}{name}"
+        if any(path.endswith(blocked) for blocked in attribute_blocklist):
+            continue
+
+        value = getattr(model, name, None)
+
+        if isinstance(value, BaseModel):
+            attributes.extend(
+                _get_asset_attributes(
+                    value,
+                    attribute_blocklist=attribute_blocklist,
+                    prefix=f"{path}.",
+                )
+            )
+        elif isinstance(value, list):
+            is_model_list = False
+            for i, item in enumerate(value):
+                if isinstance(item, BaseModel):
+                    is_model_list = True
+                    attributes.extend(
+                        _get_asset_attributes(
+                            item,
+                            attribute_blocklist=attribute_blocklist,
+                            prefix=f"{path}.{i}.",
+                        )
+                    )
+            if not is_model_list:
+                default_value = field.default if not field.is_required() else "Required"
+                type_name = _get_type_repr(field.annotation)
+                attributes.append((path, type_name, str(default_value)))
+        else:
+            default_value = "Required"
+            if not field.is_required():
+                default_value = field.default
+
+            type_name = _get_type_repr(field.annotation)
+            origin = get_origin(field.annotation)
+            args = get_args(field.annotation)
+
+            is_unparameterized_tuple = (
+                origin is tuple or field.annotation is tuple
+            ) and (not args or (len(args) == 1 and args[0] == ()))
+
+            if is_unparameterized_tuple and isinstance(default_value, tuple):
+                type_name = f"Tuple[{', '.join(_get_type_repr(type(item)) for item in default_value)}]"
+
+            attributes.append((path, str(type_name), str(default_value)))
+
+    return attributes
+
+
+def _get_type_repr(type_hint: Any) -> str:
+    """Get a user-friendly representation of a type hint."""
+    origin = get_origin(type_hint)
+    args = get_args(type_hint)
+
+    if origin is Annotated:
+        return _get_type_repr(args[0])
+    if origin is Union or "UnionType" in str(type(type_hint)):
+        return " | ".join(sorted(_get_type_repr(arg) for arg in args))
+    if origin is Literal:
+        return f"Literal[{', '.join(repr(arg) for arg in args)}]"
+    if origin in (list, Sequence):
+        if not args:
+            return "list"
+        return f"List[{_get_type_repr(args[0])}]"
+    if origin in (tuple, Tuple) or type_hint is tuple:
+        if not args or (len(args) == 1 and args[0] == ()):
+            return "Tuple"
+        if len(args) == 2 and args[1] == Ellipsis:
+            return f"Tuple[{_get_type_repr(args[0])}, ...]"
+        return f"Tuple[{', '.join(_get_type_repr(arg) for arg in args)}]"
+    if origin in (dict, Mapping):
+        if not args:
+            return "dict"
+        return f"Dict[{_get_type_repr(args[0])}, {_get_type_repr(args[1])}]"
+
+    type_name = getattr(type_hint, "__name__", None)
+    if type_name:
+        if type_name == "NoneType":
+            return "None"
+        return type_name
+
+    if origin:
+        origin_name = getattr(origin, "__name__", str(origin))
+        if "UnionType" in str(type(origin)):
+            return " | ".join(sorted(_get_type_repr(arg) for arg in get_args(origin)))
+        if args:
+            return f"{origin_name}[{', '.join(_get_type_repr(arg) for arg in args)}]"
+        return origin_name
+
+    return str(type_hint)
+
+
+def _get_attribute_from_path(obj: Any, path: str) -> Any:
+    for part in path.split("."):
+        if isinstance(obj, list):
+            obj = obj[int(part)]
+        else:
+            obj = getattr(obj, part)
+    return obj
+
+
+def _set_attribute_by_path(obj: Any, path: str, value: Any):
+    parts = path.split(".")
+    for part in parts[:-1]:
+        if isinstance(obj, list):
+            obj = obj[int(part)]
+        else:
+            obj = getattr(obj, part)
+
+    last_part = parts[-1]
+    if isinstance(obj, list):
+        obj[int(last_part)] = value
+    else:
+        setattr(obj, last_part, value)
 
 
 ### Clean ###
@@ -433,7 +619,27 @@ def parse_cli_args() -> argparse.Namespace:
         default=4,
     )
 
-    ## Clean subcommand
+    # Info
+    info_parser = subparsers.add_parser(
+        "info", help="Show info about a registered asset"
+    )
+    info_parser.add_argument(
+        dest="asset_name",
+        type=str,
+        help="Name of the asset to show the info for",
+        nargs="+" if asset_names else "*",
+        choices=("ALL", *asset_names) if asset_names else None,
+        default=None if asset_names else "NO_REGISTERED_ASSETS",
+    )
+    info_parser.add_argument(
+        "--attribute_blocklist",
+        type=str,
+        nargs="*",
+        help="A list of attributes to ignore",
+        default=("nodes.name", "nodes.python_file"),
+    )
+
+    # Clean
     clean_parser = subparsers.add_parser(
         "clean",
         help="Clean the cache directory",
