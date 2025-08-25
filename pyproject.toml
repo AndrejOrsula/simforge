@@ -74,7 +74,7 @@ dev = [
 ]
 rich = [
   #
-  "rich~=13.0",
+  "rich~=14.0",
 ]
 test = [
   #
@@ -85,7 +85,7 @@ test = [
 tracing = [
   #
   "simforge[rich]",
-  "logfire~=3.0",
+  "logfire~=4.0",
 ]
 repl = [
   #

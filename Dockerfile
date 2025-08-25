@@ -15,6 +15,7 @@ RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq --no-install-recommends \
     bash-completion \
     libgl1 \
+    libxfixes3 \
     libxi6 \
     libxkbcommon-x11-0 && \
     rm -rf /var/lib/apt/lists/*
@@ -31,6 +32,17 @@ COPY . "${SF_PATH}"
 
 ## Install the project
 RUN python -m pip install --no-input --no-cache-dir --no-deps --editable "${SF_PATH}[all]"
+
+## Assets
+ARG DEV=false
+ARG SIMFORGE_FOUNDRY_DEV=true
+ARG SIMFORGE_FOUNDRY_PATH="/root/simforge_foundry"
+ARG SIMFORGE_FOUNDRY_REMOTE="https://github.com/AndrejOrsula/simforge_foundry.git"
+ARG SIMFORGE_FOUNDRY_BRANCH="dev"
+RUN if [[ "${DEV,,}" = true && "${SIMFORGE_FOUNDRY_DEV,,}" = true ]]; then \
+    git clone "${SIMFORGE_FOUNDRY_REMOTE}" "${SIMFORGE_FOUNDRY_PATH}" --branch "${SIMFORGE_FOUNDRY_BRANCH}" && \
+    python -m pip install --no-input --no-cache-dir --editable "${SIMFORGE_FOUNDRY_PATH}" ; \
+    fi
 
 ## Configure argcomplete
 RUN echo "source /etc/bash_completion" >> "/etc/bash.bashrc" && \
