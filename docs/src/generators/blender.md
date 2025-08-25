@@ -117,6 +117,7 @@ class ExampleModel(BlModel):
     mat: SerializeAsAny[InstanceOf[BlMaterial]] | None = ExampleMat()
     texture_resolution: TexResConfig = {
         BakeType.ALBEDO: 2048,
+        BakeType.ALPHA: 4096,
         BakeType.EMISSION: 256,
         BakeType.METALLIC: 256,
         BakeType.NORMAL: 4096,

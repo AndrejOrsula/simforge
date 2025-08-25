@@ -21,10 +21,11 @@ class BlBaker(Baker):
         ]
     ) = {
         BakeType.ALBEDO: 3,
+        BakeType.ALPHA: 1,
+        BakeType.EMISSION: 1,
+        BakeType.METALLIC: 1,
         BakeType.NORMAL: 4,
         BakeType.ROUGHNESS: 2,
-        BakeType.METALLIC: 1,
-        BakeType.EMISSION: 1,
     }
     uv_angle_limit: PositiveFloat = 0.785398
 
@@ -114,6 +115,9 @@ class BlBaker(Baker):
                         or emission_color_input[3] == 0.0
                     ):
                         continue
+                case BakeType.ALPHA:
+                    # TODO: Check if alpha is constant
+                    continue
                 case _:
                     if (
                         self._shader_input_socket_name_from_type(bake_type)
@@ -288,6 +292,91 @@ class BlBaker(Baker):
                         )  # type: ignore
                         rgb_node.outputs[0].default_value = (  # type: ignore
                             *((metallic_socket.default_value,) * 3),  # type: ignore
+                            1.0,
+                        )
+                        new_link = shader_group_tree.links.new(
+                            group_output_node_shader_input_socket,
+                            rgb_node.outputs[0],
+                        )
+                        changes[i].update(
+                            {
+                                "rgb_node": rgb_node,
+                                "new_link": new_link,
+                            }
+                        )
+
+                texture = cls.__bake_single_pass_inner(
+                    bake_type=bake_type,
+                    materials_to_bake=materials_to_bake,
+                    texture_resolution=texture_resolution,
+                    texture_basename=texture_basename,
+                )
+
+                for i, mat in enumerate(materials_to_bake):
+                    if changes_i := changes.get(i):
+                        shader_group_tree = changes_i["node_tree"]
+                        shader_group_tree.links.remove(changes_i["new_link"])
+                        if node := changes_i.get("rgb_node"):
+                            shader_group_tree.nodes.remove(node)
+                        shader_group_tree.links.new(
+                            changes_i["socket"],
+                            changes_i["from_socket"],
+                        )
+
+                return texture
+
+            case BakeType.ALPHA:
+                changes: Dict[int, Dict[str, Any]] = {}
+                for i, mat in enumerate(materials_to_bake):
+                    node_tree: bpy.types.ShaderNodeTree = mat.node_tree  # type: ignore
+                    shader_res = cls._find_shader(node_tree)
+                    if shader_res is None:
+                        continue
+                    shader, shader_group_tree = shader_res
+
+                    # Find the input socket of the output shader in the group of the shader node
+                    group_output_node = next(
+                        node
+                        for node in shader_group_tree.nodes
+                        if isinstance(node, bpy.types.NodeGroupOutput)
+                    )
+                    group_output_node_shader_input_socket = next(
+                        input
+                        for input in group_output_node.inputs
+                        if input.type == "SHADER"
+                    )
+                    assert group_output_node_shader_input_socket.is_linked, (
+                        "The input socket of a shader node group output must be linked"
+                    )
+                    group_output_node_shader_link = (
+                        group_output_node_shader_input_socket.links[0]  # type: ignore
+                    )
+
+                    # Get the alpha socket
+                    alpha_socket = shader.inputs["Alpha"]
+
+                    changes[i] = {
+                        "node_tree": shader_group_tree,
+                        "socket": group_output_node_shader_input_socket,
+                        "from_socket": group_output_node_shader_link.from_socket,
+                    }
+
+                    # Temporarily disconnect the link to the shader node group output
+                    shader_group_tree.links.remove(group_output_node_shader_link)
+
+                    if alpha_socket.is_linked:
+                        # If alpha input is linked, use the same connection for the shader node group output
+                        changes[i]["new_link"] = shader_group_tree.links.new(
+                            group_output_node_shader_input_socket,
+                            alpha_socket.links[0].from_socket,  # type: ignore
+                        )
+                    else:
+                        # Otherwise, create an RGB node with the original default value and connect it to the shader node group output
+                        rgb_node: bpy.types.ShaderNodeRGB = shader_group_tree.nodes.new(
+                            type="ShaderNodeRGB"
+                        )  # type: ignore
+                        rgb_node.outputs[0].default_value = (  # type: ignore
+                            *((alpha_socket.default_value,) * 3),  # type: ignore
                             1.0,
                         )
                         new_link = shader_group_tree.links.new(
@@ -542,7 +631,10 @@ class BlBaker(Baker):
         while len(processing_queue) > 0:
             current_node_tree = processing_queue.pop()
             for node in current_node_tree.nodes:
-                if isinstance(node, bpy.types.ShaderNodeBsdfPrincipled):
+                if isinstance(
+                    node,
+                    (bpy.types.ShaderNodeBsdfPrincipled, bpy.types.ShaderNodeMixShader),
+                ):
                     return node, current_node_tree
                 elif isinstance(node, bpy.types.ShaderNodeGroup):
                     processing_queue.append(node.node_tree)  # type: ignore
@@ -553,7 +645,7 @@ class BlBaker(Baker):
         match bake_type:
             case BakeType.ALBEDO:
                 return "DIFFUSE"
-            case BakeType.EMISSION | BakeType.METALLIC:
+            case BakeType.EMISSION | BakeType.ALPHA | BakeType.METALLIC:
                 return "EMIT"
             case BakeType.NORMAL:
                 return "NORMAL"
@@ -565,6 +657,8 @@ class BlBaker(Baker):
         match bake_type:
             case BakeType.ALBEDO:
                 return "Base Color"
+            case BakeType.ALPHA:
+                return "Alpha"
             case BakeType.EMISSION:
                 return "Emission Color"
             case BakeType.METALLIC:
