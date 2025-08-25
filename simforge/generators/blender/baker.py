@@ -411,6 +411,9 @@ class BlBaker(Baker):
                 scale_to_bounds=True,
             )
 
+        # Pack islands
+        bpy.ops.uv.pack_islands(margin=0.01)
+
         # Return to object mode
         bpy.ops.object.mode_set(mode="OBJECT")
 

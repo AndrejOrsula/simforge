@@ -54,6 +54,12 @@ simforge gen -n 8 --subprocess model1
 
 > Running in a subprocess is especially useful if the generator is non-compatible with the current environment. For example, Blender requires a specific version of Python that might differ from the system's default. The `--subprocess` flag thus allows the generator to run in a separate process with the embedded Python interpreter of the locally-installed Blender application.
 
+Attributes can be overridden during generation using the `--set` flag. The format for each override is `attribute_path=value`, where `attribute_path` is the dot-separated path to the attribute you want to override (e.g., `ops.0.attribute1`). The path does not need to be fully specified if the attribute is unique within the asset (e.g., `attribute2` instead of `ops.0.attribute2`).
+
+```bash
+simforge gen model1 --set ops.0.attribute1=4 attribute2=5.5
+```
+
 ______________________________________________________________________
 
 ### `simforge ls`
@@ -75,6 +81,25 @@ List all registered assets in a tabular format.
 │ 5 │  model   │ package1 │ model1 │           │        │
 │ 6 │  model   │ package3 │ model2 │           │        │
 └───┴──────────┴──────────┴────────┴───────────┴────────┘
+```
+
+> Note: This subcommand requires the [`rich`](https://rich.readthedocs.io) package to be installed (included in the [`cli` extra](../getting_started/installation.md#extras))
+
+______________________________________________________________________
+
+### `simforge info`
+
+Show configurable attributes for registered asset(s).
+
+```bash
+❯ simforge info <asset_name>
+          Configurable attributes for asset: <asset_name>
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┓
+┃ Asset Name   ┃ Attribute Name   ┃ Attribute Type ┃ Default Value ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━┩
+│ <asset_name> │ ops.0.attribute1 │ int            │ 7             │
+│              │ ops.0.attribute2 │ float          │ 4.2           │
+└──────────────┴──────────────────┴────────────────┴───────────────┘
 ```
 
 > Note: This subcommand requires the [`rich`](https://rich.readthedocs.io) package to be installed (included in the [`cli` extra](../getting_started/installation.md#extras))

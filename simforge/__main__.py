@@ -10,7 +10,22 @@ import sys
 from functools import cache
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Any, Iterable, Literal, Mapping, Sequence, Type
+from typing import (
+    Annotated,
+    Any,
+    Iterable,
+    List,
+    Literal,
+    Mapping,
+    Sequence,
+    Tuple,
+    Type,
+    Union,
+    get_args,
+    get_origin,
+)
+
+from pydantic import BaseModel
 
 from simforge import SF_CACHE_DIR, Asset, AssetRegistry, AssetType, FileFormat
 from simforge.utils import convert_to_snake_case, logging
@@ -18,13 +33,16 @@ from simforge.utils import convert_to_snake_case, logging
 
 def main():
     def impl(
-        subcommand: Literal["gen", "ls", "clean", "repl", "docs", "test"], **kwargs
+        subcommand: Literal["gen", "ls", "info", "clean", "repl", "docs", "test"],
+        **kwargs,
     ):
         match subcommand:
             case "gen":
                 generate_assets(**kwargs)
             case "ls":
                 list_assets(**kwargs)
+            case "info":
+                show_info(**kwargs)
             case "clean":
                 clean_assets(**kwargs)
             case "repl":
@@ -42,7 +60,7 @@ def main():
 ### Generate ###
 def generate_assets(
     ## Input
-    asset_name: Iterable[str],
+    asset_name: Sequence[str],
     ## Output
     outdir: str,
     ext: Iterable[str],
@@ -57,6 +75,7 @@ def generate_assets(
     multiprocessing: bool,
     ## Misc
     forwarded_args: Sequence[str] = (),
+    overrides: Sequence[str] = (),
 ):
     if asset_name == "NO_REGISTERED_ASSETS":
         raise RuntimeError("No SimForge assets are registered")
@@ -66,9 +85,10 @@ def generate_assets(
     else:
         assets = []
         for name in set(asset_name):
-            name = convert_to_snake_case(name)
-            if asset := AssetRegistry.get_by_name(name):
-                assets.append(asset())
+            if asset_class := AssetRegistry.get_by_name(convert_to_snake_case(name)):
+                asset = asset_class()
+                _apply_overrides(asset, overrides)
+                assets.append(asset)
             else:
                 all_names = (f'"{asset.name()}"' for asset in _get_registered_assets())
                 raise ValueError(
@@ -140,7 +160,11 @@ def list_assets(hash_len: int, forwarded_args: Sequence[str] = ()):
             asset_cache_dir = cache_dir_for_type.joinpath(asset_name)
             asset_cache = {
                 path.name: len(
-                    [asset for asset in os.listdir(path) if not asset.endswith(".json")]
+                    tuple(
+                        asset
+                        for asset in os.listdir(path)
+                        if not asset.endswith(".json")
+                    )
                 )
                 for path in (
                     (
@@ -177,6 +201,293 @@ def list_assets(hash_len: int, forwarded_args: Sequence[str] = ()):
             )
 
     print(table)
+
+
+### Info ###
+def show_info(
+    asset_name: Sequence[str],
+    attribute_blocklist: Sequence[str],
+    forwarded_args: Sequence[str] = (),
+):
+    if AssetRegistry.n_assets() == 0:
+        raise ValueError("Cannot list SimForge assets because none are registered")
+
+    if not find_spec("rich"):
+        raise ImportError('The "rich" package is required to list SimForge assets')
+    from rich import print
+    from rich.markup import escape
+    from rich.table import Table
+
+    if "ALL" in asset_name:
+        asset_name = tuple(asset.name() for asset in _get_registered_assets())
+
+    table = Table(
+        title=f"Configurable attributes for asset{'s' if len(asset_name) > 1 else ''}: {', '.join(name for name in asset_name)}",
+        show_header=True,
+        header_style="bold magenta",
+    )
+    table.add_column("Asset Name", style="blue", no_wrap=True)
+    table.add_column("Attribute Name", style="cyan")
+    table.add_column("Attribute Type", style="green")
+    table.add_column("Default Value", style="yellow")
+
+    for i, name in enumerate(asset_name):
+        asset_class = AssetRegistry.get_by_name(convert_to_snake_case(name))
+        if not asset_class:
+            all_names = (f'"{asset.name()}"' for asset in _get_registered_assets())
+            raise ValueError(
+                f'Asset "{name}" not found among registered SimForge assets: {", ".join(all_names)}'
+            )
+
+        asset = asset_class()
+        attributes = _get_asset_attributes(
+            asset,
+            attribute_blocklist=attribute_blocklist,
+        )
+
+        if not attributes:
+            continue
+
+        if i > 0:
+            table.add_section()
+
+        for attr_index, (attr_name, type_hint, default) in enumerate(attributes):
+            table.add_row(
+                name if attr_index == 0 else "",
+                escape(attr_name),
+                escape(type_hint),
+                escape(str(default)),
+            )
+
+    print(table)
+
+
+def _apply_overrides(asset: Asset, overrides: Sequence[str]):
+    """Apply CLI overrides to an asset."""
+    if not overrides:
+        return
+
+    all_attributes = _get_asset_attributes(asset, attribute_blocklist=())
+    all_paths = [attr[0] for attr in all_attributes]
+
+    for override in overrides:
+        if "=" not in override:
+            raise ValueError(
+                f"Invalid override format: '{override}'. Expected 'key=value'."
+            )
+
+        key, value_str = override.split("=", 1)
+
+        # Find matching paths
+        matching_paths = [p for p in all_paths if p.endswith(key)]
+
+        if not matching_paths:
+            raise ValueError(f"Attribute '{key}' not found in asset '{asset.name()}'.")
+        if len(matching_paths) > 1:
+            # Check for exact match
+            if key in matching_paths:
+                matching_paths = [key]
+            else:
+                raise ValueError(
+                    f"Attribute '{key}' is ambiguous in asset '{asset.name()}'. "
+                    f"Matching paths: {', '.join(matching_paths)}. Please provide a more specific path."
+                )
+
+        path = matching_paths[0]
+
+        # Get the original attribute to know its type
+        field_type = None
+        temp_obj = asset
+        try:
+            for part in path.split("."):
+                if isinstance(temp_obj, list):
+                    temp_obj = temp_obj[int(part)]
+                elif isinstance(temp_obj, BaseModel):
+                    field = temp_obj.model_fields[part]
+                    field_type = field.annotation
+                    temp_obj = getattr(temp_obj, part)
+
+        except (KeyError, IndexError, AttributeError):
+            raise ValueError(f"Could not retrieve type for attribute at path: {path}")
+
+        if field_type is None:
+            # Fallback for nested objects that are not BaseModels but have attributes set
+            current_value = _get_attribute_from_path(asset, path)
+            field_type = type(current_value)
+
+        # Cast value
+        try:
+            if get_origin(field_type) in (list, List, Sequence):
+                # Assumes comma-separated values for lists
+                inner_type = get_args(field_type)[0] if get_args(field_type) else str
+                typed_value = [inner_type(v.strip()) for v in value_str.split(",")]
+            elif get_origin(field_type) in (tuple, Tuple):
+                inner_types = get_args(field_type)
+                values = [v.strip() for v in value_str.strip("()").split(",")]
+                if (
+                    inner_types
+                    and len(inner_types) > 1
+                    and inner_types[1] is not Ellipsis
+                ):
+                    typed_value = tuple(
+                        inner_types[i](values[i]) for i in range(len(values))
+                    )
+                else:  # variable-length tuple or un-annotated tuple
+                    typed_value = tuple(
+                        type(v)(v_str)
+                        for v, v_str in zip(
+                            _get_attribute_from_path(asset, path), values
+                        )
+                    )
+
+            elif field_type is bool:
+                typed_value = value_str.lower() in ("true", "1", "yes")
+            elif field_type is not None:
+                typed_value = field_type(value_str)
+            else:
+                typed_value = value_str
+        except (ValueError, TypeError) as e:
+            raise ValueError(
+                f"Could not cast value '{value_str}' to type {field_type} for attribute '{key}'. Reason: {e}"
+            )
+
+        _set_attribute_by_path(asset, path, typed_value)
+        logging.info(f"Overrode '{path}' with value '{typed_value}'")
+
+
+def _get_asset_attributes(
+    model: BaseModel, attribute_blocklist: Sequence[str], prefix: str = ""
+) -> list[tuple[str, str, str]]:
+    attributes = []
+    for name, field in model.model_fields.items():
+        path = f"{prefix}{name}"
+        if any(path.endswith(blocked) for blocked in attribute_blocklist):
+            continue
+
+        value = getattr(model, name, None)
+
+        if isinstance(value, BaseModel):
+            attributes.extend(
+                _get_asset_attributes(
+                    value,
+                    attribute_blocklist=attribute_blocklist,
+                    prefix=f"{path}.",
+                )
+            )
+        elif isinstance(value, list):
+            is_model_list = False
+            for i, item in enumerate(value):
+                if isinstance(item, BaseModel):
+                    is_model_list = True
+                    attributes.extend(
+                        _get_asset_attributes(
+                            item,
+                            attribute_blocklist=attribute_blocklist,
+                            prefix=f"{path}.{i}.",
+                        )
+                    )
+            if not is_model_list:
+                default_value = field.default if not field.is_required() else "Required"
+                type_name = _get_type_repr(field.annotation)
+                attributes.append((path, type_name, str(default_value)))
+        else:
+            default_value = "Required"
+            if not field.is_required():
+                default_value = field.default
+
+            type_name = _get_type_repr(field.annotation)
+            origin = get_origin(field.annotation)
+            args = get_args(field.annotation)
+
+            is_unparameterized_tuple = (
+                origin is tuple or field.annotation is tuple
+            ) and (not args or (len(args) == 1 and args[0] == ()))
+
+            if is_unparameterized_tuple and isinstance(default_value, tuple):
+                type_name = f"Tuple[{', '.join(_get_type_repr(type(item)) for item in default_value)}]"
+
+            attributes.append((path, str(type_name), str(default_value)))
+
+    return attributes
+
+
+def _get_type_repr(type_hint: Any) -> str:
+    """Get a user-friendly representation of a type hint."""
+    origin = get_origin(type_hint)
+    args = get_args(type_hint)
+
+    if origin is Annotated:
+        return _get_type_repr(args[0])
+    if origin is Union or "UnionType" in str(type(type_hint)):
+        return " | ".join(sorted(_get_type_repr(arg) for arg in args))
+    if origin is Literal:
+        return f"Literal[{', '.join(repr(arg) for arg in args)}]"
+    if origin in (list, Sequence):
+        if not args:
+            return "list"
+        return f"List[{_get_type_repr(args[0])}]"
+    if origin in (tuple, Tuple) or type_hint is tuple:
+        if not args or (len(args) == 1 and args[0] == ()):
+            return "Tuple"
+        if len(args) == 2 and args[1] == Ellipsis:
+            return f"Tuple[{_get_type_repr(args[0])}, ...]"
+        return f"Tuple[{', '.join(_get_type_repr(arg) for arg in args)}]"
+    if origin in (dict, Mapping):
+        if not args:
+            return "dict"
+        return f"Dict[{_get_type_repr(args[0])}, {_get_type_repr(args[1])}]"
+
+    type_name = getattr(type_hint, "__name__", None)
+    if type_name:
+        if type_name == "NoneType":
+            return "None"
+        return type_name
+
+    if origin:
+        origin_name = getattr(origin, "__name__", str(origin))
+        if "UnionType" in str(type(origin)):
+            return " | ".join(sorted(_get_type_repr(arg) for arg in get_args(origin)))
+        if args:
+            return f"{origin_name}[{', '.join(_get_type_repr(arg) for arg in args)}]"
+        return origin_name
+
+    return str(type_hint)
+
+
+def _get_attribute_from_path(obj: Any, path: str) -> Any:
+    for part in path.split("."):
+        try:
+            if isinstance(obj, list):
+                obj = obj[int(part)]
+            else:
+                obj = getattr(obj, part)
+        except (IndexError, AttributeError, ValueError):
+            return None
+    return obj
+
+
+def _set_attribute_by_path(obj: Any, path: str, value: Any):
+    parts = path.split(".")
+    for part in parts[:-1]:
+        try:
+            if isinstance(obj, list):
+                obj = obj[int(part)]
+            else:
+                obj = getattr(obj, part)
+        except (IndexError, AttributeError, ValueError):
+            logging.error(f"Failed to access attribute at '{'.'.join(parts[:-1])}'")
+            return
+
+    last_part = parts[-1]
+    try:
+        if isinstance(obj, list):
+            obj[int(last_part)] = value
+        else:
+            setattr(obj, last_part, value)
+    except (IndexError, AttributeError, ValueError) as e:
+        logging.error(
+            f"Failed to set attribute '{last_part}' on '{type(obj).__name__}': {e}"
+        )
 
 
 ### Clean ###
@@ -416,6 +727,14 @@ def parse_cli_args() -> argparse.Namespace:
         help="Run the generation pipeline in a separate subprocess with an independent Python environment",
         default=False,
     )
+    group.add_argument(
+        "--set",
+        dest="overrides",
+        type=str,
+        nargs="*",
+        help="Override specific attributes of the asset during generation. Format: attribute_path=value",
+        default=(),
+    )
 
     ## List subcommand
     list_parser = subparsers.add_parser(
@@ -433,7 +752,27 @@ def parse_cli_args() -> argparse.Namespace:
         default=4,
     )
 
-    ## Clean subcommand
+    # Info
+    info_parser = subparsers.add_parser(
+        "info", help="Show info about a registered asset"
+    )
+    info_parser.add_argument(
+        dest="asset_name",
+        type=str,
+        help="Name of the asset to show the info for",
+        nargs="+" if asset_names else "*",
+        choices=("ALL", *asset_names) if asset_names else None,
+        default=None if asset_names else "NO_REGISTERED_ASSETS",
+    )
+    info_parser.add_argument(
+        "--attribute_blocklist",
+        type=str,
+        nargs="*",
+        help="A list of attributes to ignore",
+        default=("nodes.name", "nodes.python_file"),
+    )
+
+    # Clean
     clean_parser = subparsers.add_parser(
         "clean",
         help="Clean the cache directory",
@@ -486,10 +825,17 @@ def parse_cli_args() -> argparse.Namespace:
         forwarded_args = []
 
     # Parse arguments
-    args, unsupported_args = parser.parse_known_args()
+    args, undeclared_args = parser.parse_known_args()
 
     # Add forwarded arguments
     args.forwarded_args = forwarded_args
+
+    # Separate overrides from other unknown arguments
+    if args.subcommand in ("gen",):
+        args.overrides += tuple(arg for arg in undeclared_args if "=" in arg)
+        unsupported_args = tuple(arg for arg in undeclared_args if "=" not in arg)
+    else:
+        unsupported_args = undeclared_args
 
     # Detect any unsupported arguments
     if unsupported_args:
