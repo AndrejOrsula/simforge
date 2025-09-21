@@ -23,6 +23,7 @@ def spawn_from_usd(
     cfg: "UsdFileCfg",
     translation: Tuple[float, float, float] | None = None,
     orientation: Tuple[float, float, float, float] | None = None,
+    **kwargs,
 ) -> Usd.Prim:
     # Get prim
     if not prim_utils.is_prim_path_valid(prim_path):
@@ -41,7 +42,7 @@ def spawn_from_usd(
     if cfg.mesh_collision_props is not None:
         cfg.mesh_collision_props.func(prim_path, cfg.mesh_collision_props)
 
-    return __spawn_from_usd(prim_path, cfg, translation, orientation)
+    return __spawn_from_usd(prim_path, cfg, translation, orientation, **kwargs)
 
 
 def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):

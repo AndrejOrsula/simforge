@@ -23,7 +23,7 @@ classifiers = [
 keywords = ["simulation", "procedural"]
 readme = "README.md"
 license = { text = "MIT OR Apache-2.0" }
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 dependencies = [
   ## Paths
   "platformdirs~=4.0",
