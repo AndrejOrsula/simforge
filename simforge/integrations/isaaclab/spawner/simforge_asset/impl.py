@@ -30,6 +30,7 @@ def spawn_simforge_assets(
     cfg: "SimforgeAssetCfg",
     translation: Tuple[float, float, float] | None = None,
     orientation: Tuple[float, float, float, float] | None = None,
+    **kwargs,
 ) -> Usd.Prim:
     # Generate the assets
     logging.debug(f'Spawning SimForge assets for "{prim_path}"')
