@@ -6,9 +6,11 @@ from isaaclab.sim import clone
 from isaaclab.sim.spawners.from_files.from_files import (
     spawn_from_usd as __spawn_from_usd,
 )
+from isaaclab.sim.utils import bind_physics_material
 from pxr import Usd, UsdGeom, UsdPhysics
 
 from pxr import PhysxSchema  # isort: skip
+
 
 if TYPE_CHECKING:
     from simforge.integrations.isaaclab.spawner.from_files.cfg import (
@@ -53,6 +55,10 @@ def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
         UsdPhysics.ArticulationRootAPI,  # type: ignore
     ):
         UsdPhysics.ArticulationRootAPI.Apply(parent_prim)  # type: ignore
+
+    if cfg.physics_material is not None:
+        physics_material_path = f"{prim_path}/physics_material"
+        cfg.physics_material.func(physics_material_path, cfg.physics_material)
 
     queue = parent_prim.GetChildren()
     while queue:
@@ -126,6 +132,9 @@ def _apply_missing_apis(prim_path: str, cfg: "FileCfg"):
                     )
                 ):
                     PhysxSchema.PhysxDeformableBodyAPI.Apply(child_prim)  # type: ignore
+
+                if cfg.physics_material is not None:
+                    bind_physics_material(child_prim.GetPath(), physics_material_path)
 
 
 def __has_parent_with_api(child_prim: Usd.Prim, api_schema: Any) -> bool:
