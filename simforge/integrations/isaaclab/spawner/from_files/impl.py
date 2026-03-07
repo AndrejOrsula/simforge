@@ -33,7 +33,14 @@ def spawn_from_usd(
             prim_path,
             usd_path=cfg.usd_path,
             translation=translation,
-            orientation=orientation,
+            # Convert from XYZW to WXYZ
+            # - Isaac Lab provides XYZW
+            # - Isaac Sim expects WXYZ
+            orientation=(
+                (orientation[3], orientation[0], orientation[1], orientation[2])
+                if orientation is not None
+                else None
+            ),
             scale=cfg.scale,
         )
 
