@@ -1,12 +1,11 @@
 from typing import TYPE_CHECKING, Any, Tuple
 
-import isaacsim.core.utils.prims as prim_utils
 import isaacsim.core.utils.stage as stage_utils
 from isaaclab.sim import clone
 from isaaclab.sim.spawners.from_files.from_files import (
     spawn_from_usd as __spawn_from_usd,
 )
-from isaaclab.sim.utils import bind_physics_material
+from isaaclab.sim.utils import bind_physics_material, create_prim, is_prim_path_valid
 from pxr import Usd, UsdGeom, UsdPhysics
 
 from pxr import PhysxSchema  # isort: skip
@@ -28,19 +27,15 @@ def spawn_from_usd(
     **kwargs,
 ) -> Usd.Prim:
     # Get prim
-    if not prim_utils.is_prim_path_valid(prim_path):
-        prim_utils.create_prim(
+    # Use isaaclab's create_prim (accepts XYZW quaternion convention) instead of
+    # isaacsim.core.utils.prims.create_prim which relies on the legacy
+    # isaacsim.core.prims.XFormPrim API that is incompatible with isaaclab_physx.
+    if not is_prim_path_valid(prim_path):
+        create_prim(
             prim_path,
             usd_path=cfg.usd_path,
             translation=translation,
-            # Convert from XYZW to WXYZ
-            # - Isaac Lab provides XYZW
-            # - Isaac Sim expects WXYZ
-            orientation=(
-                (orientation[3], orientation[0], orientation[1], orientation[2])
-                if orientation is not None
-                else None
-            ),
+            orientation=orientation,
             scale=cfg.scale,
         )
 
