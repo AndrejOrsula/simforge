@@ -28,7 +28,7 @@ jobs:
         dockerfile:
           - Dockerfile
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       ## Login to Docker Hub and/or GitHub container registry
       - name: Login to GitHub container registry
